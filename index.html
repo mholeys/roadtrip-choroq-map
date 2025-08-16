@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html = style="height: 100%;">
+  <head>
+    <title>ChoroQ HG 2 World Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="scripts/leaflet.css">
+    <script src="scripts/leaflet.js"></script>
+	<script src="scripts/Leaflet.PlaceNameLayer.js"></script>
+  </head>
+
+  <body style="height: 100%;margin: 0;">
+    <div id="map" style="width: 100%; height: 100%; background: #000000;"></div>
+    <script type="text/javascript">
+    var mapheight = 13600;
+    var mapwidth = 13600;
+    var factorx = 0.01882352941176470588235294117647
+    var factory = 0.01882352941176470588235294117647
+
+    L.CRS.pr = L.extend({}, L.CRS.Simple, {
+      projection: L.Projection.LonLat,
+      transformation: new L.Transformation(factorx, 0, -factory, 256),
+      // Changing the transformation is the key part, everything else is the same.
+      // By specifying a factor, you specify what distance in meters one pixel occupies (as it still is CRS.Simple in all other regards).
+      // In this case, I have a tile layer with 256px pieces, so Leaflet thinks it's only 256 meters wide.
+      // I know the map is supposed to be 2048x2048 meters, so I specify a factor of 0.125 to multiply in both directions.
+      // In the actual project, I compute all that from the gdal2tiles tilemapresources.xml, 
+      // which gives the necessary information about tilesizes, total bounds and units-per-pixel at different levels.
+
+
+    // Scale, zoom and distance are entirely unchanged from CRS.Simple
+      scale: function(zoom) {
+        return Math.pow(2, zoom);
+      },
+
+      zoom: function(scale) {
+        return Math.log(scale) / Math.LN2;
+      },
+
+      distance: function(latlng1, latlng2) {
+        var dx = latlng2.lng - latlng1.lng,
+          dy = latlng2.lat - latlng1.lat;
+
+        return Math.sqrt(dx * dx + dy * dy);
+      },
+      infinite: true
+    });
+    
+    var map = L.map('map', {
+        center: [6800, 6800],
+        zoom: 10,
+        //layers: [minimap_layer, world_layer, world_sea_layer],
+        crs: L.CRS.pr,
+    }).setView([0, 0], 0);
+    
+    //Creating the Map
+    var sw = map.unproject([0, 0], 4);  // Level 4, because this is the level where meters-per-pixel is exactly 1
+    var ne = map.unproject([mapheight, mapwidth], 4);
+    var layerbounds = new L.LatLngBounds(sw, ne);
+	
+	// Icons
+	var icon_gem_ruby = L.icon({
+		iconUrl:       'icons/gem_ruby.png',
+		iconRetinaUrl: 'icons/gem_ruby.png',
+		shadowUrl:     'scripts/images/marker-shadow.png',
+		iconSize:    [100, 164],
+		iconAnchor:  [49, 154],
+		popupAnchor: [1, -100],
+		tooltipAnchor: [16, -28],
+		shadowSize:  [0, 0]
+	});
+	var icon_gem_sapphire = L.icon({
+		iconUrl:       'icons/gem_sapphire.png',
+		iconRetinaUrl: 'icons/gem_sapphire.png',
+		shadowUrl:     'scripts/images/marker-shadow.png',
+		iconSize:    [100, 164],
+		iconAnchor:  [49, 154],
+		popupAnchor: [1, -75],
+		tooltipAnchor: [16, -28],
+		shadowSize:  [0, 0]
+	});
+	var icon_gem_emerald = L.icon({
+		iconUrl:       'icons/gem_emerald.png',
+		iconRetinaUrl: 'icons/gem_emerald.png',
+		shadowUrl:     'scripts/images/marker-shadow.png',
+		iconSize:    [100, 164],
+		iconAnchor:  [49, 154],
+		popupAnchor: [1, -145],
+		tooltipAnchor: [16, -28],
+		shadowSize:  [0, 0]
+	});
+	var icon_gem_moonstone = L.icon({
+		iconUrl:       'icons/gem_moonstone.png',
+		iconRetinaUrl: 'icons/gem_moonstone.png',
+		shadowUrl:     'scripts/images/marker-shadow.png',
+		iconSize:    [100, 164],
+		iconAnchor:  [49, 154],
+		popupAnchor: [1, -90],
+		tooltipAnchor: [16, -28],
+		shadowSize:  [0, 0]
+	});
+	var icon_gem_amethyst = L.icon({
+		iconUrl:       'icons/gem_amethyst.png',
+		iconRetinaUrl: 'icons/gem_amethyst.png',
+		shadowUrl:     'scripts/images/marker-shadow.png',
+		iconSize:    [100, 164],
+		iconAnchor:  [49, 154],
+		popupAnchor: [1, -80],
+		tooltipAnchor: [16, -28],
+		shadowSize:  [0, 0]
+	});
+	var icon_gem_topaz = L.icon({
+		iconUrl:       'icons/gem_topaz.png',
+		iconRetinaUrl: 'icons/gem_topaz.png',
+		shadowUrl:     'scripts/images/marker-shadow.png',
+		iconSize:    [100, 164],
+		iconAnchor:  [49, 154],
+		popupAnchor: [1, -100],
+		tooltipAnchor: [16, -28],
+		shadowSize:  [0, 0]
+	});
+	var icon_gem_opal = L.icon({
+		iconUrl:       'icons/gem_opal.png',
+		iconRetinaUrl: 'icons/gem_opal.png',
+		shadowUrl:     'scripts/images/marker-shadow.png',
+		iconSize:    [100, 164],
+		iconAnchor:  [49, 154],
+		popupAnchor: [1, -120],
+		tooltipAnchor: [16, -28],
+		shadowSize:  [0, 0]
+	});
+	
+	var icon_coin = L.icon({
+		iconUrl:       'icons/coin.png',
+		iconRetinaUrl: 'icons/coin.png',
+		shadowUrl:     '',
+		iconSize:    [50, 81],
+		iconAnchor:  [24, 77],
+		popupAnchor: [1, -75],
+		tooltipAnchor: [16, -28],
+		shadowSize:  [0, 0]
+	});
+	
+
+   var minimap_layer = L.tileLayer('tiles/minimap/{z}/{x}/{y}.jpeg', {
+      continuousWorld: false,
+      noWrap: true,
+      minZoom: 0,
+      maxZoom: 6,
+      bounds: layerbounds,
+    }).addTo(map);
+   var world_layer =  L.tileLayer('tiles/world/{z}/{x}/{y}.jpeg', {
+      continuousWorld: false,
+      noWrap: true,
+      minZoom: 0,
+      maxZoom: 6,
+      bounds: layerbounds,
+    }).addTo(map);
+    var world_sea_layer = L.tileLayer('tiles/world-water/{z}/{x}/{y}.jpeg', {
+      continuousWorld: false,
+      noWrap: true,
+      minZoom: 0,
+      maxZoom: 6,
+      bounds: layerbounds,
+    }).addTo(map);
+    
+    var labels = L.LayerGroup.placeNameLayer('tiles/places/{z}/{x}/{y}.tsv',{
+		zooms: [0, 1, 2, 3, 4, 5, 6],
+		bounds: layerbounds,
+		padding: 3
+	}).addTo(map);
+	
+	
+    var maps = {
+    "Minimap": minimap_layer,
+    "World": world_layer,
+    "World w/o water": world_sea_layer
+    };
+
+    
+    //Coordinate Finder
+	/*var marker = L.marker([13600, 13600], {
+      draggable: true,
+    }).addTo(map);
+    marker.bindPopup('LatLng Marker').openPopup();
+    marker.on('dragend', function(e) {
+        var pos = marker.getLatLng();
+        //pos = L.latLng(pos.lat - 400, pos.lng);
+        var popupContent = `Position: X: ${pos.lng.toFixed(2)} Y: ${pos.lat.toFixed(2)}`;
+        marker.getPopup().setContent(popupContent).openOn(map);
+    });*/
+	//Markers
+    var town_data = [
+    ["town_peach_town", "Peach Town", "", "Q Garage", "Peach Town", 8834.521484375, 9301.025390625],
+	["town_fuji_city", "Fuji City", "", "Q Garage", "Fuji City", 6375.000000000001, 6621.533203125001],
+	["town_sandpolis", "Sandpolis", "", "Q Garage", "Sandpolis", 2326.708984375, 6347.607421875001],
+	["town_chestnut_canyon", "Chestnut Canyon", "", "Q Garage", "Chestnut Canyon", 5496.777343750001, 3868.1640625000005],
+	["town_mushrooom_road", "Mushroom Road", "", "Q Garage", "Mushroom Road", 7658.300781250001, 4170.3125],
+	["town_white_mountain", "White Mountain", "", "Q Garage", "White Mountain", 9291.89453125, 2661.2304687500005],
+	["town_papaya_island", "Papaya Island", "", "Q Garage", "Papaya Island", 9169.04296875, 12600.585937500002],
+    ["town_my_city", "My City", "", "Q Garage", "My City", 2872.07, 9952.64],
+    ];
+    var quickpic_data = [	
+	["qp_01", "Quick-Pic 1", "", "Quick-Pic", "Peach Town", 9827.294921875, 9336.71875],
+	["qp_02", "Quick-Pic 2", "", "Quick-Pic", "Peach Town", 9752.587890625, 9594.04296875],
+	["qp_03", "Quick-Pic 3", "", "Quick-Pic", "Peach Town", 9483.642578125, 9242.08984375],
+	["qp_04", "Quick-Pic 4", "", "Quick-Pic", "Peach Town", 8890.13671875, 9108.447265625],
+	["qp_05", "Quick-Pic 5", "", "Quick-Pic", "Peach Town", 8934.9609375, 9295.21484375],
+	["qp_06", "Quick-Pic 6", "", "Quick-Pic", "Peach Town", 8838.671875, 9434.66796875],
+	["qp_07", "Quick-Pic 7", "", "Quick-Pic", "Peach Town", 8933.30078125, 9954.296875],
+	["qp_08", "Quick-Pic 8", "", "Quick-Pic", "Peach Town", 8507.470703125, 9537.59765625],
+	["qp_09", "Quick-Pic 9", "", "Quick-Pic", "Peach Town", 8800.48828125, 9350.830078125],
+	["qp_10", "Quick-Pic 10", "", "Quick-Pic", "Peach Town", 8793.84765625, 9369.921875],
+	["qp_11", "Quick-Pic 11", "", "Quick-Pic", "", 9829.78515625, 10788.525390625002],
+	["qp_12", "Quick-Pic 12", "", "Quick-Pic", "", 7704.785156250001, 8825.390625],
+	["qp_13", "Quick-Pic 13", "", "Quick-Pic", "", 8239.35546875, 6681.298828125001],
+	["qp_14", "Quick-Pic 14", "", "Quick-Pic", "", 8260.9375, 6682.128906250001], 
+	["qp_15", "Quick-Pic 15", "", "Quick-Pic", "", 8239.35546875, 6661.376953125001],
+	["qp_16", "Quick-Pic 16", "", "Quick-Pic", "", 8260.107421875, 6663.037109375001],
+	["qp_17", "Quick-Pic 17", "", "Quick-Pic", "Fuji City", 6225.585937500001, 6552.636718750001], 
+	["qp_18", "Quick-Pic 18", "", "Quick-Pic", "Fuji City", 6227.246093750001, 6187.402343750001], 
+	["qp_19", "Quick-Pic 19", "", "Quick-Pic", "Fuji City", 6174.121093750001, 6632.324218750001],
+	["qp_20", "Quick-Pic 20", "", "Quick-Pic", "Fuji City", 6038.818359375001, 6969.335937500001],
+	["qp_21", "Quick-Pic 21", "", "Quick-Pic", "Fuji City", 6036.328125000001, 6367.529296875001],
+	["qp_22", "Quick-Pic 22", "", "Quick-Pic", "Fuji City", 6067.041015625001, 6233.056640625001],
+	["qp_23", "Quick-Pic 23", "", "Quick-Pic", "Fuji City", 5878.613281250001, 6501.171875000001],
+	["qp_24", "Quick-Pic 24", "", "Quick-Pic", "Fuji City", 5965.771484375001, 5994.824218750001],
+	["qp_25", "Quick-Pic 25", "", "Quick-Pic", "Fuji City", 6396.582031250001, 6627.343750000001],
+	["qp_26", "Quick-Pic 26", "", "Quick-Pic", "Fuji City", 6341.796875000001, 6629.003906250001], 
+	["qp_27", "Quick-Pic 27", "", "Quick-Pic", "", 5192.138671875001, 6736.914062500001],
+	["qp_28", "Quick-Pic 28", "", "Quick-Pic", "My City", 3048.8769531250005, 10107.861328125],
+	["qp_29", "Quick-Pic 29", "", "Quick-Pic", "My City", 2988.2812500000005, 9924.4140625], 
+	["qp_30", "Quick-Pic 30", "", "Quick-Pic", "022", 2813.9648437500005, 7623.437500000001],
+	["qp_31", "Quick-Pic 31", "", "Quick-Pic", "022", 2983.3007812500005, 7774.511718750001],
+	["qp_32", "Quick-Pic 32", "", "Quick-Pic", "022", 2328.369140625, 7619.287109375001],
+	["qp_33", "Quick-Pic 33", "", "Quick-Pic", "022", 2330.859375, 7779.492187500001],
+	["qp_34", "Quick-Pic 34", "", "Quick-Pic", "022", 3462.2558593750005, 7618.457031250001],
+	["qp_35", "Quick-Pic 35", "", "Quick-Pic", "022", 3463.9160156250005, 7778.662109375001],
+	["qp_36", "Quick-Pic 36", "", "Quick-Pic", "Sandpolis", 2937.6464843750005, 6499.511718750001],
+	["qp_37", "Quick-Pic 37", "", "Quick-Pic", "Sandpolis", 3127.7343750000005, 6229.736328125001],
+	["qp_38", "Quick-Pic 38", "", "Quick-Pic", "Sandpolis", 2649.6093750000005, 6338.476562500001], 
+	["qp_39", "Quick-Pic 39", "", "Quick-Pic", "Sandpolis", 2646.2890625000005, 6418.164062500001], 
+	["qp_40", "Quick-Pic 40", "", "Quick-Pic", "Sandpolis", 2938.4765625000005, 6339.306640625001],
+	["qp_41", "Quick-Pic 41", "", "Quick-Pic", "Sandpolis", 2776.6113281250005, 6339.306640625001],
+	["qp_42", "Quick-Pic 42", "", "Quick-Pic", "Sandpolis", 2388.96484375, 6542.675781250001],
+	["qp_43", "Quick-Pic 43", "", "Quick-Pic", "Sandpolis", 2543.359375, 5989.843750000001], 
+	["qp_44", "Quick-Pic 44", "", "Quick-Pic", "Sandpolis", 2324.21875, 6298.632812500001], 
+	["qp_45", "Quick-Pic 45", "", "Quick-Pic", "Sandpolis", 2388.134765625, 6298.632812500001],
+	["qp_46", "Quick-Pic 46", "", "Quick-Pic", "Sandpolis", 2536.71875, 5900.195312500001], 
+	["qp_47", "Quick-Pic 47", "", "Quick-Pic", "Sandpolis", 3126.9042968750005, 6269.580078125001],
+	["qp_48", "Quick-Pic 48", "", "Quick-Pic", "", 2697.7539062500005, 4899.12109375],
+	["qp_49", "Quick-Pic 49", "", "Quick-Pic", "", 3297.0703125000005, 4897.4609375], 
+	["qp_50", "Quick-Pic 50", "", "Quick-Pic", "", 2697.7539062500005, 4499.0234375],
+	["qp_51", "Quick-Pic 51", "", "Quick-Pic", "", 3297.0703125000005, 4499.0234375], 
+	["qp_52", "Quick-Pic 52", "", "Quick-Pic", "", 3662.3046875000005, 5206.250000000001], 
+	["qp_53", "Quick-Pic 53", "", "Quick-Pic", "", 3709.6191406250005, 5845.410156250001],
+	["qp_54", "Quick-Pic 54", "", "Quick-Pic", "", 3708.7890625000005, 5886.083984375001],
+	["qp_55", "Quick-Pic 55", "", "Quick-Pic", "", 1925.7812500000002, 5617.968750000001], 
+	["qp_56", "Quick-Pic 56", "", "Quick-Pic", "", 1867.6757812500002, 5545.751953125001],
+	["qp_57", "Quick-Pic 57", "", "Quick-Pic", "", 1966.4550781250002, 5428.710937500001],
+	["qp_58", "Quick-Pic 58", "", "Quick-Pic", "", 4375.341796875, 4412.6953125],
+	["qp_59", "Quick-Pic 59", "", "Quick-Pic", "", 4372.8515625, 4423.486328125],
+	["qp_60", "Quick-Pic 60", "", "Quick-Pic", "Chestnut Canyon", 5357.324218750001, 3924.6093750000005], 
+	["qp_61", "Quick-Pic 61", "", "Quick-Pic", "Chestnut Canyon", 5490.136718750001, 3727.0507812500005], 
+	["qp_62", "Quick-Pic 62", "", "Quick-Pic", "Chestnut Canyon", 5544.921875000001, 3932.9101562500005], 
+	["qp_63", "Quick-Pic 63", "", "Quick-Pic", "Chestnut Canyon", 5486.816406250001, 3932.9101562500005],
+	["qp_64", "Quick-Pic 64", "", "Quick-Pic", "Chestnut Canyon", 5667.773437500001, 3668.9453125000005], 
+	["qp_65", "Quick-Pic 65", "", "Quick-Pic", "Mushroom Road", 7589.404296875001, 4169.482421875],
+	["qp_66", "Quick-Pic 66", "", "Quick-Pic", "Mushroom Road", 7645.019531250001, 4423.486328125], 
+	["qp_67", "Quick-Pic 67", "", "Quick-Pic", "Mushroom Road", 7669.921875000001, 4113.037109375],
+	["qp_68", "Quick-Pic 68", "", "Quick-Pic", "Mushroom Road", 7670.751953125001, 4134.619140625],
+	["qp_69", "Quick-Pic 69", "", "Quick-Pic", "Mushroom Road", 7525.488281250001, 4489.892578125],
+	["qp_70", "Quick-Pic 70", "", "Quick-Pic", "Mushroom Road", 8111.523437500001, 3657.3242187500005], 
+	["qp_71", "Quick-Pic 71", "", "Quick-Pic", "White Mountain", 9273.6328125, 3074.6093750000005],
+	["qp_72", "Quick-Pic 72", "", "Quick-Pic", "White Mountain", 9808.203125, 3528.6621093750005],
+	["qp_73", "Quick-Pic 73", "", "Quick-Pic", "White Mountain", 9133.349609375, 2714.3554687500005],
+	["qp_74", "Quick-Pic 74", "", "Quick-Pic", "White Mountain", 9403.955078125, 3214.0625000000005],
+	["qp_75", "Quick-Pic 75", "", "Quick-Pic", "White Mountain", 8868.5546875, 3688.8671875000005],
+	["qp_76", "Quick-Pic 76", "", "Quick-Pic", "White Mountain", 9315.966796875, 2642.1386718750005],
+	["qp_77", "Quick-Pic 77", "", "Quick-Pic", "White Mountain", 9265.33203125, 2642.1386718750005],
+	["qp_78", "Quick-Pic 78", "", "Quick-Pic", "White Mountain", 9329.248046875, 1516.5527343750002],
+	["qp_79", "Quick-Pic 79", "", "Quick-Pic", "White Mountain", 9369.091796875, 1516.5527343750002],
+	["qp_80", "Quick-Pic 80", "", "Quick-Pic", "", 8746.533203125, 4069.0429687500005],
+	["qp_81", "Quick-Pic 81", "", "Quick-Pic", "", 8822.0703125, 4319.7265625],
+	["qp_82", "Quick-Pic 82", "", "Quick-Pic", "", 8735.7421875, 4432.6171875], 
+	["qp_83", "Quick-Pic 83", "", "Quick-Pic", "", 8631.982421875, 5466.064453125001],
+	["qp_84", "Quick-Pic 84", "", "Quick-Pic", "", 8712.5, 5892.724609375001],
+	["qp_85", "Quick-Pic 85", "", "Quick-Pic", "", 8659.375, 6324.365234375001],
+	["qp_86", "Quick-Pic 86", "", "Quick-Pic", "", 9027.099609375, 7029.101562500001],
+	["qp_87", "Quick-Pic 87", "", "Quick-Pic", "Papaya Island", 8983.10546875, 12613.037109375002],
+	["qp_88", "Quick-Pic 88", "", "Quick-Pic", "Papaya Island", 9099.31640625, 12773.242187500002],
+	["qp_89", "Quick-Pic 89", "", "Quick-Pic", "Papaya Island", 9344.189453125, 13321.093750000002],
+	["qp_90", "Quick-Pic 90", "", "Quick-Pic", "Papaya Island", 9310.986328125, 13189.941406250002],
+	["qp_91", "Quick-Pic 91", "", "Quick-Pic", "Papaya Island", 9717.724609375, 12816.406250000002],
+	["qp_92", "Quick-Pic 92", "", "Quick-Pic", "Papaya Island", 9060.302734375, 13082.861328125002],
+	["qp_93", "Quick-Pic 93", "", "Quick-Pic", "Papaya Island", 9209.716796875, 12367.333984375002],
+	["qp_94", "Quick-Pic 94", "", "Quick-Pic", "Papaya Island", 9691.9921875, 12799.804687500002], 
+	["qp_95", "Quick-Pic 95", "", "Quick-Pic", "Papaya Island", 9179.00390625, 12571.533203125002],
+	["qp_96", "Quick-Pic 96", "", "Quick-Pic", "Papaya Island", 9174.0234375, 12637.109375000002], 
+    ];
+	
+	var coin_data = [
+	["coin_1", "Coin 1", "", "Coin",     9235, 2751],
+	["coin_2", "Coin 2", "", "Coin",     4963, 3459],
+	["coin_3", "Coin 3", "", "Coin",     1500, 4937],
+	["coin_4", "Coin 4", "", "Coin",     5575, 6555],
+	["coin_5", "Coin 5", "", "Coin",     8990, 3563.5],
+	["coin_6", "Coin 6", "", "Coin",     10465, 3500],
+	["coin_7", "Coin 7", "", "Coin",     1648, 5710],
+	["coin_8", "Coin 8", "", "Coin",     2404, 7720],
+	["coin_9", "Coin 9", "", "Coin",     5353.5, 3733],
+	["coin_10", "Coin 10", "", "Coin",   8352, 4440],
+	["coin_11", "Coin 11", "", "Coin",   9383.5, 3250.5],
+	["coin_12", "Coin 12", "", "Coin",   3830, 4609],
+	["coin_13", "Coin 13", "", "Coin",   2736, 6449],
+	["coin_14", "Coin 14", "", "Coin",   2165, 6152],
+	["coin_15", "Coin 15", "", "Coin",   1210, 6680],
+	["coin_16", "Coin 16", "", "Coin",   2600, 4100],
+	["coin_17", "Coin 17", "", "Coin",   7295.5, 8825.5],
+	["coin_18", "Coin 18", "", "Coin",   5661, 6228],
+	["coin_19", "Coin 19", "", "Coin",   8665, 13074],
+	["coin_20", "Coin 20", "", "Coin",   9990, 8660],
+	["coin_21", "Coin 21", "", "Coin",   1749.5, 7705.5],
+	["coin_22", "Coin 22", "", "Coin",   3263.5, 5197],
+	["coin_23", "Coin 23", "", "Coin",   5010, 3890],
+	["coin_24", "Coin 24", "", "Coin",   5676, 6940],
+	["coin_25", "Coin 25", "", "Coin",   8303, 6240],
+	["coin_26", "Coin 26", "", "Coin",   8578, 3682],
+	["coin_27", "Coin 27", "", "Coin",   8932, 13342.5],
+	["coin_28", "Coin 28", "", "Coin",   9415, 8256],
+	["coin_29", "Coin 29", "", "Coin",   7760, 3590],
+	["coin_30", "Coin 30", "", "Coin",   8400.3, 9441.5],
+	["coin_31", "Coin 31", "", "Coin",   8413.8, 9660],
+	["coin_32", "Coin 32", "", "Coin",   9212, 10867.8],
+	["coin_33", "Coin 33", "", "Coin",   2780, 10662],
+	["coin_34", "Coin 34", "", "Coin",   8687, 4352],
+	["coin_35", "Coin 35", "", "Coin",   8553, 9387.4],
+	["coin_36", "Coin 36", "", "Coin",   7178.7, 4547.5],
+	["coin_37", "Coin 37", "", "Coin",   10490, 2728.75],
+	["coin_38", "Coin 38", "", "Coin",   9045.6, 9246.3],
+	["coin_39", "Coin 39", "", "Coin",   8574, 12523],
+	["coin_40", "Coin 40", "", "Coin",   2800, 4900],
+	["coin_41", "Coin 41", "", "Coin",   8951.42, 1367.85],
+	["coin_42", "Coin 42", "", "Coin",   8832, 12400],
+	["coin_43", "Coin 43", "", "Coin",   5561, 6156],
+	["coin_44", "Coin 44", "", "Coin",   2500, 5540],
+	["coin_45", "Coin 45", "", "Coin",   9003, 2790],
+	["coin_46", "Coin 46", "", "Coin",   8735, 6314],
+	["coin_47", "Coin 47", "", "Coin",   2656, 7796],
+	["coin_48", "Coin 48", "", "Coin",   4304, 7327],
+	["coin_49", "Coin 49", "", "Coin",   4787, 6701],
+	["coin_50", "Coin 50", "", "Coin",   2620, 6793],
+	["coin_51", "Coin 51", "", "Coin",   7607, 6122],
+	["coin_52", "Coin 52", "", "Coin",   5998.5, 6634],
+	["coin_53", "Coin 53", "", "Coin",   5288, 6760],
+	["coin_54", "Coin 54", "", "Coin",   9254, 6791],
+	["coin_55", "Coin 55", "", "Coin",   7246.4, 4172],
+	["coin_56", "Coin 56", "", "Coin",   8604.2, 9221.6],
+	["coin_57", "Coin 57", "", "Coin",   5445, 6606],
+	["coin_58", "Coin 58", "", "Coin",   9225, 12768],
+	["coin_59", "Coin 59", "", "Coin",   7144, 3961],
+	["coin_60", "Coin 60", "", "Coin",   7774, 3633],
+	["coin_61", "Coin 61", "", "Coin",   9105.5, 13035],
+	["coin_62", "Coin 62", "", "Coin",   2473, 6098],
+	["coin_63", "Coin 63", "", "Coin",   5078, 3740],
+	["coin_64", "Coin 64", "", "Coin",   9250, 2980],
+	["coin_65", "Coin 65", "", "Coin",   7969, 9411],
+	["coin_66", "Coin 66", "", "Coin",   5891.5, 6168.5],
+	["coin_67", "Coin 67", "", "Coin",   5198.5, 3893.5],
+	["coin_68", "Coin 68", "", "Coin",   8902, 13111],
+	["coin_69", "Coin 69", "", "Coin",   9071, 2697],
+	["coin_70", "Coin 70", "", "Coin",   6942, 8157],
+	["coin_71", "Coin 71", "", "Coin",   2271, 5637],
+	["coin_72", "Coin 72", "", "Coin",   8664, 12919.72],
+	["coin_73", "Coin 73", "", "Coin",   9469.5, 3490],
+	["coin_74", "Coin 74", "", "Coin",   9573, 9509],
+	["coin_75", "Coin 75", "", "Coin",   8477.3, 9144.6],
+	["coin_76", "Coin 76", "", "Coin",   5808, 6094],
+	["coin_77", "Coin 77", "", "Coin",   7151, 6613],
+	["coin_78", "Coin 78", "", "Coin",   9433.3, 9502],
+	["coin_79", "Coin 79", "", "Coin",   8598, 1291],
+	["coin_80", "Coin 80", "", "Coin",   2743, 6230],
+	["coin_81", "Coin 81", "", "Coin",   3789, 8736.5],
+	["coin_82", "Coin 82", "", "Coin",   3479, 5655],
+	["coin_83", "Coin 83", "", "Coin",   8532, 12506],
+	["coin_84", "Coin 84", "", "Coin",   1499, 5329],
+	["coin_85", "Coin 85", "", "Coin",   10060, 10700],
+	["coin_86", "Coin 86", "", "Coin",   9356, 12860],
+	["coin_87", "Coin 87", "", "Coin",   8727.5, 7029.5],
+	["coin_88", "Coin 88", "", "Coin",   2417, 5862],
+	["coin_89", "Coin 89", "", "Coin",   2356, 6517],
+	["coin_90", "Coin 90", "", "Coin",   7657, 6694],
+	["coin_91", "Coin 91", "", "Coin",   9077, 3319],
+	["coin_92", "Coin 92", "", "Coin",   1973, 6797],
+	["coin_93", "Coin 93", "", "Coin",   6140, 6624],
+	["coin_94", "Coin 94", "", "Coin",   8286, 4240],
+	["coin_95", "Coin 95", "", "Coin",   7867.5, 6672],
+	["coin_96", "Coin 96", "", "Coin",   8823.5, 9302],
+	["coin_97", "Coin 97", "", "Coin",   1519, 10966],
+	["coin_98", "Coin 98", "", "Coin",   2519, 7611],
+	["coin_99", "Coin 99", "", "Coin",   9046, 3172.5],
+	["coin_100", "Coin 100", "", "Coin", 8528.5, 9988.3],
+	];
+
+	var gem_data = [
+		["ruby", "Red Ruby", 0xEC1C24, "Gem", 1939.06, 4924.02, icon_gem_ruby],
+		["sapphire", "Blue Sapphire", 0x3F48CC, "Gem", 2996.58, 4699.90, icon_gem_sapphire],
+		["emerald", "Green Emerald", 0x0ED145, "Gem", 9373.24, 1340.58, icon_gem_emerald],
+		["moonstone", "Violet Moonstone", 0xB83DBA, "Gem", 8502.49, 3439.01, icon_gem_moonstone],
+		["amethyst", "Red-Violet Amethyst", 0x88001B, "Gem", 9636.38, 2799.02, icon_gem_amethyst],
+		["topaz", "Yellow Topaz", 0xFFF200, "Gem", 8058.40, 6160.84, icon_gem_topaz],
+		["opal", "Black Opal", 0x585858, "Gem", 9606.49, 12766.60, icon_gem_opal],
+	];
+	
+	var building_data = [
+	["peach_qfactory", "Q's Factory", 8822.07, 9306.01 ],
+	["peach_parts", "Parts Shop", 8837.01, 9269.48],
+	["peach_body", "Body Shop", 8728.27, 9516.02],
+	["peach_paint", "Paint Shop", 8895.95, 9320.12],
+	["peach_bartender", "Bartender", 8823.73, 9633.06],
+	["peach_police", "Policeman", 8866.89, 9334.23],
+	["peach_peachfm", "Peach FM Front Desk", 8910.06, 9237.94],
+	["peach_kinsera", "Kinsera", 9459.57, 9272.8],
+	["peach_kevin_mum", "Kevin's mum", 8866.06, 9157.42],
+	["peach_wolf", "Wolf", 8939.94, 9267.82],
+	["peach_best", "Best", 9153.27, 9231.3],
+	["peach_jousset", "Jousset", 8958.2, 9135.84],
+	["peach_owner", "Owner", 8836.18, 9378.22],
+	["peach_grandpa_tal", "Grandpa Tal", 8925.83, 10002.44],
+	["peach_jones", "Jones", 9569.97, 9439.65],
+	["peach_fight", "Fight", 8774.76, 9614.79],
+	["peach_milton", "Milton", 9223, 9293.55],
+	["peach_barrel_cave", "Entrance to the cave", 8925, 9987.5],
+	["fuji_qfactory", "Q's Factory", 6375, 6626.51],
+	["fuji_parts", "Parts Shop", 6140.09, 6604.1],
+	["fuji_body", "Body Shop", 5681.05, 6382.47],
+	["fuji_paint", "Paint Shop", 6035.5, 6488.72],
+	["fuji_bartender", "Barkeeper", 6257.13, 6593.31],
+	["fuji_heizo", "Heizo", 6211.47, 6626.51],
+	["fuji_sale_assistant", "Echigoya sales assistant", 5961.62, 6307.76],
+	["fuji_nanaha", "Princess Nanaha", 5828.81, 6483.74],
+	["fuji_king", "King", 5908.5, 6554.3],
+	["fuji_maze_guard", "Guard of the maze", 5853.71, 6687.11],
+	["fuji_otomi", "Otomi", 6206.49, 6139.26],
+	["fuji_medium", "Spirit Mediums", 6282.86, 6169.14],
+	["fuji_cake_shop", "Dumpling Cake shop", 5917.63, 6008.94],
+	["fuji_uzumasa", "Uzumasa", 5781.49, 6386.62],
+	["fuji_iwasuke", "Iwasuke", 6070.36, 6919.53],
+	["fuji_hakosuke", "Hakosuke", 5679.39, 6743.55],
+	["fuji_nobizo", "Nobizo", 5849.56, 6341.8],
+	["fuji_natsuo", "Natsuo", 5280.13, 6665.53],
+	["fuji_hanako", "Hanako", 5684.38, 6483.74],
+	["sandpolis_qfactory", "Q's Factory", 2326.71, 6345.95],
+	["sandpolis_parts", "Parts Shop", 2380.66, 6411.52],
+	["sandpolis_body", "Body Shop", 2381.49, 6346.78],
+	["sandpolis_paint", "Paint Shop", 2327.54, 6411.52],
+	["sandpolis_bartender", "Bartender", 2593.16, 5950],
+	["sandpolis_police", "Captain Rombo", 2569.09, 6124.32],
+	["sandpolis_figure8", "Figure 8 Registration", 3012.35, 6658.06],
+	["sandpolis_football", "Football Registration,", 3037.26, 6255.47],
+	["sandpolis_roulette", "Roulette Registration", 3112.79, 6499.51],
+	["sandpolis_tony", "Tony", 2293.51, 6379.98],
+	["sandpolis_johnny", "Johnny", 2493.55, 5989.01],
+	["sandpolis_frank", "Frank", 2538.38, 6056.25],
+	["sandpolis_sebastian", "Sebastian", 2485.25, 6399.07],
+	["sandpolis_shop_manager", "Shop Manager", 3103.66, 6320.21],
+	["sandpolis_mr_king", "Mr. King", 2471.14, 6679.64],
+	["sandpolis_butch", "Butch", 2056.93, 5660.3],
+	["sandpolis_barton", "Barton", 2784.91, 6424.8],
+	["sandpolis_chocolat", "Chocolat", 3008.2, 6779.25],
+	["sandpolis_merci", "Merci", 2699.41, 6417.33],
+	["sandpolis_bob", "Bob", 2447.9, 6355.91],
+	["sandpolis_richard", "Richard", 2506.01, 6360.06],
+	["chestnut_qfactory", "Q's Factory", 5497.61, 3872.31],
+	["chestnut_bartender", "Bartender", 5571.48, 3890.58],
+	["chestnut_wallace", "Wallace", 5583.11, 3927.1],
+	["chestnut_gene", "Gene", 5287.6, 3966.94],
+	["chestnut_maya_carton", "Maya Carton", 5743.31, 3756.93],
+	["chestnut_rock_climbing", "Rock Climbing entrance", 5548.24, 3693.85],
+	["chestnut_mason", "Mason", 5618.8, 3634.08],
+	["chestnut_ross_rorke", "Ross Rorke", 5286.77, 3808.4],
+	["chestnut_tom", "Tom", 5466.06, 3990.19],
+	["chestnut_lowry", "Lowry", 5485.99, 3988.53],
+	["chestnut_betty", "Betty", 5547.41, 3970.26],
+	["chestnut_lucy", "Lucy", 5546.58, 3988.53],
+	["mushroom_qfactory", "Q's Factory", 7659.13, 4171.14],
+	["mushroom_parts", "Parts Shop", 7629.25, 4189.4],
+	["mushroom_bartender", "Bartender", 7587.74, 4509.81],
+	["mushroom_jumbo", "Jumbo", 7528.81, 4469.97],
+	["mushroom_goddess", "Goddess", 7646.68, 4469.97 ],
+	["white_mt_qfactory", "Q's Factory", 9290.23, 2658.74],
+	["white_mt_parts", "Parts Shop", 9360.79, 2869.58],
+	["white_mt_body", "Body Shop", 9349.17, 2668.7],
+	["white_mt_paint", "Paint Shop", 9340.04, 2899.46],
+	["white_mt_bartender", "Bartender", 9250.39, 2875.39],
+	["white_mt_police", "Policeman", 9189.79, 2674.51],
+	["white_mt_merrin", "Merrin", 9627.25, 2979.15],
+	["white_mt_ski_jump", "Ski Jumping Registration", 9622.27, 2730.13],
+	["white_mt_grandma_dizzy", "Grandma Dizzy", 9482.81, 3100.34],
+	["white_mt_lettar", "Lettar", 9299.37, 2898.63],
+	["white_mt_santa", "Santa Claus", 9867.14, 3499.61],
+	["white_mt_keitel", "Keitel", 9437.16, 3557.71],
+	["white_mt_ross", "Ross", 9318.46, 3556.05],
+	["white_mt_busheme", "Busheme", 9258.69, 3555.22],
+	["white_mt_madison", "Madison", 9198.1, 3555.22],
+	["white_mt_bunger", "Bunger", 9135.01, 3556.05],
+	["white_mt_emily", "Emily", 9374.07, 3189.16],
+	["white_mt_bigfoot", "Bigfoot Joe", 9762.55, 3250.59],
+	["white_mt_curling", "Curling Registration", 9456.25, 3307.86],
+	["white_mt_kate", "Kate", 9193.12, 2868.75 ],
+	["papaya_island_qfactory", "Q's Factory", 9174.02, 12602.25],
+	["papaya_island_parts", "Parts Shop", 9134.18, 12708.5],
+	["papaya_island_body", "Body Shop", 9012.99, 12500.98],
+	["papaya_island_bartender", "Bartender", 9220.51, 12454.49],
+	["papaya_island_police", "Policeman", 9180.66, 12544.14],
+	["papaya_island_obstacle", "Obstacle Course Registration", 9655.47, 12872.85],
+	["papaya_island_papaya_mayor", "Papaya Mayor", 9210.55, 12414.65],
+	["papaya_island_luke", "Luke", 8989.75, 12537.5],
+	["papaya_island_granpa_costello", "Grandpa Costello", 9736.82, 12847.95],
+	["papaya_island_andy", "Andy", 9114.26, 12740.04],
+	["papaya_island_shirley", "Shirley", 8920.02, 12603.91],
+	["papaya_island_casa", "Casa", 9369.92, 13321.09],
+	["papaya_island_sandro", "Sandro", 9717.72, 12949.22],
+	["papaya_island_micky", "Micky", 9150.78, 12663.67],
+	["papaya_island_daniel", "Daniel", 9723.54, 12909.38],
+	["papaya_island_shimisa", "Shimisa", 9202.25, 12313.38],
+	["papaya_island_romba", "Romba", 9296.88, 13120.21],
+	["papaya_island_pollepolle", "Pollepolle", 9063.62, 13134.33],
+	["my_city_qfactory", "Q's Factory", 2919.38, 9830.62],
+	["my_city_parts", "Parts Shop", 2858.79, 9924.41],
+	["my_city_body", "Body Shop", 3106.98, 10091.26],
+	["my_city_paint", "Paint Shop", 3122.75, 9863.82],
+	["my_city_police", "Accel", 2919.38, 9918.6],
+	["my_city_2nd_shop", "Second-hand shop", 2979.15, 9867.97],
+	["my_city_estate_agent", "Wonder Estate Agency", 2974.17, 9760.89],
+	["my_city_manei", "Manei", 3055.52, 9879.59],
+	["my_city_george", "George", 3024.8, 9950.15],
+	["my_city_roberts", "Roberts", 2911.08, 10116.99],
+	["my_city_dayan", "Dayan", 2921.04, 9951.81],
+	["my_city_brian", "Brian", 2852.98, 9880.42],
+	["my_city_roji", "Roji, teacher", 2615.58, 9900.34],
+	["my_city_coine", "Coine", 2770.8, 9959.28],
+	["my_city_kuwano", "Kuwano", 2788.23, 9879.59],
+	["my_city_mien", "Mien", 2769.14, 10116.99],
+	["my_city_flower", "Flower", 2705.22, 9931.88],
+	["my_city_gichi", "Gichi", 2696.92, 10014.06],
+	["my_city_akiban", "Akiban", 2768.31, 10064.7],
+	["my_city_sally", "Sally", 2706.05, 9872.95],
+	["my_city_rally", "Rally Center", 3141.02, 9899.51],
+	["_laz", "Laz", 8787.21, 6169.14],
+	["_ufo", "UFO", 3897.22, 5699.32],
+	["_benji", "Benji", 2896.14, 5100.83],
+	["lighthousr_picarl", "Picarl", 1899.22, 5336.57],
+	["202_seidon", "Seidon", 9344.19, 1343.9],
+	];
+	
+	/*
+	Converts from lat/lng to x/y in game
+	var quickpic_data2 = [];
+	
+	for (m = 0; m < quickpic_data.length; m++) {
+		const marker_data = quickpic_data[m];
+		var y = marker_data[5];
+		var x = marker_data[6];
+		const minY = -85;
+		const maxY = 85;
+		const minX = -180;
+		const maxX = 180;
+		const newMinY = 0;
+		const newMaxY = 13600;
+		const newMinX = 0;
+		const newMaxX = 13600;
+		y = (((y - minY) * (newMaxY - newMinY)) / (maxY - minY)) + newMinY;
+		x = (((x - minX) * (newMaxX - newMinX)) / (maxX - minX)) + newMinX;
+		newData = "[\""+marker_data[0]+"\", \""+marker_data[1]+"\", \""+marker_data[2]+"\", \""+marker_data[3]+"\", \""+marker_data[4]+"\", "+y+", "+x+"],"
+		console.log(newData);
+		newData = [ marker_data[0], marker_data[1], marker_data[2], marker_data[3], marker_data[4], y, x ];
+		quickpic_data2.push(newData);
+	}*/
+    
+    // Setup qp markers
+    var quickpic_markers = [];
+    for (m = 0; m < quickpic_data.length; m++) {
+        const marker_data = quickpic_data[m];
+        //console.log([marker_data[5],marker_data[6]]);
+        const marker = L.marker([marker_data[5],marker_data[6]], {
+          draggable: false,
+        });//.addTo(map);
+        quickpic_markers.push(marker);
+        const popupText = marker_data[1].toString();
+        marker.bindPopup(popupText).openPopup();
+        marker.on('dragend', function(e) {
+            var pos = marker.getLatLng();
+            pos = L.latLng(pos.lat - 400, pos.lng); // Adjust due to map border
+            var popupContent = `Position: X: ${pos.lng.toFixed(2)} Y: ${pos.lat.toFixed(2)}`;
+            marker.getPopup().setContent(popupContent).openOn(map);
+            console.log("[\""+marker_data[0]+"\", \""+marker_data[1]+"\", \""+marker_data[2]+"\", \""+marker_data[3]+"\", \""+marker_data[4]+"\", "+marker.getLatLng().lat+", "+marker.getLatLng().lng+"],");
+        });
+    }
+    // Setup town markers
+    var town_markers = [];
+    for (m = 0; m < town_data.length; m++) {
+        const marker_data = town_data[m];
+        //console.log([marker_data[5],marker_data[6]]);
+        const marker = L.marker([marker_data[5],marker_data[6]], {
+          draggable: false,
+        });//.addTo(map);
+        town_markers.push(marker);
+        const popupText = marker_data[1].toString();
+        marker.bindPopup(popupText).openPopup();
+        marker.on('dragend', function(e) {
+          marker.getPopup().setContent(marker.getLatLng().toString()).openOn(map);
+          console.log("[\""+marker_data[0]+"\", \""+marker_data[1]+"\", \""+marker_data[2]+"\", \""+marker_data[3]+"\", \""+marker_data[4]+"\", "+marker.getLatLng().lat+", "+marker.getLatLng().lng+"],");
+          //console.log(marker.getLatLng());
+        });
+    }
+	
+	// Setup buildings/people
+	var people_markers = [];
+    for (m = 0; m < building_data.length; m++) {
+        const marker_data = building_data[m];
+        //console.log([marker_data[5],marker_data[6]]);
+        const marker = L.marker([marker_data[2],marker_data[3]], {
+          draggable: false,
+        });//.addTo(map);
+        people_markers.push(marker);
+        const popupText = marker_data[1].toString();
+        marker.bindPopup(popupText).openPopup();
+        marker.on('dragend', function(e) {
+          marker.getPopup().setContent(marker.getLatLng().toString()).openOn(map);
+          console.log("[\""+marker_data[0]+"\", \""+marker_data[1]+"\", "+marker.getLatLng().lat+", "+marker.getLatLng().lng+"],");
+          //console.log(marker.getLatLng());
+        });
+    }
+	
+	var coin_markers = [];
+    for (m = coin_data.length-1; m > 0; m--) {
+        const marker_data = coin_data[m];
+        //console.log([marker_data[5],marker_data[6]]);
+        const marker = L.marker([marker_data[4]+400,marker_data[5]], {icon: icon_coin}, {
+          draggable: false,
+        });//.addTo(map);
+        coin_markers.push(marker);
+        const popupText = marker_data[1].toString();
+        marker.bindPopup(popupText).openPopup();
+        marker.on('dragend', function(e) {
+          marker.getPopup().setContent(marker.getLatLng().toString()).openOn(map);
+          console.log("[\""+marker_data[0]+"\", \""+marker_data[1]+"\", \""+marker_data[2]+"\", \""+marker_data[3]+"\", "+marker.getLatLng().lat+", "+marker.getLatLng().lng+"],");
+          //console.log(marker.getLatLng());
+        });
+    }
+	
+	var gem_markers = [];
+    for (m = gem_data.length-1; m >= 0; m--) {
+        const marker_data = gem_data[m];
+        //console.log([marker_data[5],marker_data[6]]);
+        const marker = L.marker([marker_data[4],marker_data[5]], {icon: marker_data[6]}, {
+          draggable: true,
+        });//.addTo(map);
+        gem_markers.push(marker);
+        const popupText = marker_data[1].toString();
+        marker.bindPopup(popupText).openPopup();
+        marker.on('dragend', function(e) {
+          marker.getPopup().setContent(marker.getLatLng().toString()).openOn(map);
+          console.log("[\""+marker_data[0]+"\", \""+marker_data[1]+"\", \""+marker_data[2]+"\", \""+marker_data[3]+"\", "+marker.getLatLng().lat+", "+marker.getLatLng().lng+"],");
+          //console.log(marker.getLatLng());
+        });
+    }
+	
+	// Setup region bounds
+	var regions = [];
+	for (var c = 0; c < 4; c++) {
+		for (var b = 0; b < 4; b++) {
+			for (var a = 0; a < 4; a++) {
+				var x = b * 3200 + (a % 2) * 1600;
+				var y = c * 3200 + 400; // Adding 400 here to correct for image issues
+				if (a > 1) { 
+					x += 800; 
+					y += 1600;
+				}
+				// Draw region
+				var region = [[y, x], [y + 1600, x + 1600]];
+				var rect = L.rectangle(region, {color: "#7788cc", weight: 4})
+				const popupText = `FIELD: ${c}${b}${a}<p>From X: ${x}, Y: ${y-400}</p><p>To X: ${x+1600}, Y: ${y-400+1600}</p>`;
+				rect.bindPopup(popupText).openPopup();
+				regions.push(rect);
+			}
+		}
+	}
+    
+    // Marker groups
+    var mg_towns = L.layerGroup(town_markers);
+    var mg_quickpic = L.layerGroup(quickpic_markers);
+	var mg_coins = L.layerGroup(coin_markers);
+	var mg_gems = L.layerGroup(gem_markers);
+	var mg_people = L.layerGroup(people_markers);
+	var overlay_regions = L.layerGroup(regions);
+    var overlays = {
+		"People": mg_people,
+        "Towns" : mg_towns,
+        "Quick Pics" : mg_quickpic,
+		"Coins": mg_coins,
+		"Gems": mg_gems,
+		"Regions": overlay_regions,
+    }
+    //GROUP CONTROLS
+    L.control.layers(maps, overlays).addTo(map);
+	map.attributionControl.addAttribution('<a href="https://www.takaratomy.co.jp/english/">Takara</a>');
+	map.attributionControl.addAttribution('<a href="http://www.e-game.co.jp/">E-Game</a>');
+	map.attributionControl.addAttribution('<a href="https://github.com/mholeys/roadtrip-choroq-tools">mholeys</a>');
+
+    </script>
+  </body>
+</html>
