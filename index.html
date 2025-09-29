@@ -147,21 +147,24 @@
       continuousWorld: false,
       noWrap: true,
       minZoom: 0,
-      maxZoom: 6,
+      maxNativeZoom: 6,
+      maxZoom: 8,
       bounds: layerbounds,
     }).addTo(map);
    var world_layer =  L.tileLayer('tiles/world/{z}/{x}/{y}.jpeg', {
       continuousWorld: false,
       noWrap: true,
       minZoom: 0,
-      maxZoom: 6,
+      maxNativeZoom: 6,
+      maxZoom: 8,
       bounds: layerbounds,
     }).addTo(map);
     var world_sea_layer = L.tileLayer('tiles/world-water/{z}/{x}/{y}.jpeg', {
       continuousWorld: false,
       noWrap: true,
       minZoom: 0,
-      maxZoom: 6,
+      maxNativeZoom: 6,
+      maxZoom: 8,
       bounds: layerbounds,
     }).addTo(map);
     
