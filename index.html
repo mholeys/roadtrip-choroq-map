@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html = style="height: 100%;">
+<html style="height: 100%;">
   <head>
     <title>ChoroQ HG 2 World Map</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -52,6 +52,7 @@
         zoom: 10,
         //layers: [minimap_layer, world_layer, world_sea_layer],
         crs: L.CRS.pr,
+        fullscreenControl: true,
     }).setView([0, 0], 0);
     
     //Creating the Map
@@ -167,19 +168,30 @@
       maxZoom: 8,
       bounds: layerbounds,
     }).addTo(map);
-    
+
+    // Course tile layers
+    var course_layer = L.tileLayer('tiles/course/{z}/{x}/{y}.jpeg', {
+      continuousWorld: false,
+      noWrap: true,
+      minZoom: 0,
+      maxNativeZoom: 6,
+      maxZoom: 8,
+      bounds: layerbounds,
+    }).addTo(map);
+
     //var labels = L.LayerGroup.placeNameLayer('tiles/places/{z}/{x}/{y}.tsv',{
 	//	zooms: [0, 1, 2, 3, 4, 5, 6],
 	//	bounds: layerbounds,
 	//	padding: 3
 	//}).addTo(map);
 	
-	
     var maps = {
-    "Minimap": minimap_layer,
-    "World": world_layer,
-    "World w/o water": world_sea_layer
+        "Minimap": minimap_layer,
+        "World": world_layer,
+        "World w/o water": world_sea_layer,
+        "Course/Actions": course_layer
     };
+
 
     
     //Coordinate Finder
@@ -204,6 +216,53 @@
 		["town_papaya_island", "Papaya Island", "", "Q Garage", "Papaya Island", 9169.04296875, 12600.585937500002],
 		["town_my_city", "My City", "", "Q Garage", "My City", 2872.07, 9952.64],
     ];
+    var course_data = [
+      ["course_c00", "C00", "Peach Raceway", "", "", 8000, 0],
+      ["course_c00", "C01", "Peach Raceway II", "", "", 8000, 1600],
+      ["course_c00", "C02", "Temple Raceway", "", "", 8000, 3200],
+      ["course_c00", "C03", "Ninja Temple Raceway", "", "", 8000, 4800],
+      ["course_c00", "C04", "Desert Raceway", "", "", 8000, 6400],
+      ["course_c00", "C05", "Night Glow Raceway", "", "", 8000, 8000],
+      ["course_c00", "C06", "Snow Mountain Raceway", "", "", 8000, 9600],
+      ["course_c00", "C07", "Miner 49er Raceway", "", "", 8000, 11200],
+      ["course_c00", "C08", "Slick Track", "", "", 9600, 0],
+      ["course_c00", "C09", "Oval Raceway", "", "", 9600, 1600],
+      ["course_c00", "C10", "River Raceway", "", "", 9600, 3200],
+      ["course_c00", "C11", "Snow Mountain Raceway II", "", "", 9600, 4800],
+      ["course_c00", "C12", "Lava Run Raceway", "", "", 9600, 6400],
+      ["course_c00", "C13", "Sunny Beach Raceway", "", "", 9600, 8000],
+      ["course_c00", "C14", "Lagoon Raceway", "", "", 9600, 9600],
+      ["course_c00", "C15", "", "", "", 9600, 11200],
+      ["course_c00", "C16", "", "", "", 11200, 0],
+      ["course_c00", "C17", "", "", "", 11200, 1600],
+      ["course_c00", "C18", "Tin Raceway", "", "", 11200, 3200],
+      ["course_c00", "C19", "Tin Raceway (Night)", "", "", 11200, 4800],
+      ["course_c00", "C20", "Endurance Run", "", "", 11200, 6400],
+    ];
+    var action_data = [
+      ["action_c00", "A00", "Treasure Hunting Maze", "", "", 6400, 0],
+      ["action_c00", "A01", "Sliding Door Race", "", "", 6400, 1600],
+      ["action_c00", "A02", "Highway Race", "", "", 6400, 3200],
+      ["action_c00", "A03", "Rock Climbing", "", "", 6400, 4800],
+      ["action_c00", "A04", "Drag Race", "", "", 6400, 6400],
+      ["action_c00", "A05", "Golf", "", "", 6400, 8000],
+      ["action_c00", "A06", "Roulette", "", "", 6400, 9600],
+      ["action_c00", "A07", "Figure 8", "", "", 6400, 11200],
+      ["action_c00", "A08", "Football", "", "", 4800, 0],
+      ["action_c00", "A09", "Rainbow Jump", "", "", 4800, 1600],
+      ["action_c00", "A10", "Tunnel Race", "", "", 4800, 3200],
+      ["action_c00", "A11", "Obstacle Course", "", "", 4800, 4800],
+      ["action_c00", "A12", "Which-way? Race", "", "", 4800, 6400],
+      ["action_c00", "A13", "Volcano Course", "", "", 4800, 8000],
+      ["action_c00", "A14", "Curling", "", "", 4800, 9600],
+      ["action_c00", "A15", "Barrel Dodging", "", "", 4800, 11200],
+      ["action_c00", "A16", "", "", "", 3200,  0],
+      ["action_c00", "A17", "Ski Jumping", "", "", 3200,  1600],
+      ["action_c00", "A18", "Fishing", "", "", 3200,  3200],
+      ["action_c00", "A19", "", "", "", 3200,  4800],
+      ["action_c00", "A20", "", "", "", 3200,  6400],
+    ];
+
     var quickpic_data = [	
 		["qp_01", "Quick-Pic 1", "", "Quick-Pic", "Peach Town", 9827.294921875, 9336.71875],
 		["qp_02", "Quick-Pic 2", "", "Quick-Pic", "Peach Town", 9752.587890625, 9594.04296875],
@@ -619,15 +678,15 @@
         });
     }
 	
-	// Setup buildings/people
-	var people_markers = [];
+	// Setup buildings/npcs
+	var npcs_markers = [];
     for (m = 0; m < building_data.length; m++) {
         const marker_data = building_data[m];
         //console.log([marker_data[5],marker_data[6]]);
         const marker = L.marker([marker_data[2],marker_data[3]], {
           draggable: false,
         });//.addTo(map);
-        people_markers.push(marker);
+        npcs_markers.push(marker);
         const popupText = marker_data[1].toString();
         marker.bindPopup(popupText).openPopup();
         marker.on('dragend', function(e) {
@@ -693,24 +752,7 @@
 	}
 
 	// Setup paths
-	//var people_paths = [];
-	//var town_paths = [mycity_paths, peachtown_paths, fuji_city_paths, sandpolis_paths, chestnut_canyon_paths, white_mountain_paths, papaya_island_paths, cloud_hill_paths]
-	//for (var t = 0; t < town_paths.length; t++) {
-	//    for (var p = 0; p < town_paths[t].length; p++) {
-	//        // TODO: npc names, info, different colour per line
-	//        // Correct path to this map
-	//        for (var point = 0; point < town_paths[t][p].length; point++) {
-    //            latlng = town_paths[t][p][point];
-    //            y = latlng[0] + 400;  // Adding 400 here to correct for image issues
-    //            x = latlng[1];
-    //            town_paths[t][p][point] = [y, x];
-	//        }
-    //        people_paths.push(L.polyline(town_paths[t][p], smoothFactor=5.0));
-    //    }
-	//}
-
-	// Setup paths
-	var people_paths = [];
+	var npcs_paths = [];
 
 	//var town_paths = [mycity_paths, peachtown_paths, fuji_city_paths, sandpolis_paths, chestnut_canyon_paths, white_mountain_paths, papaya_island_paths, cloud_hill_paths]
 	var town_names = ["My City", "Peach town", "Fuju City", "Sand polis", "Chestnut Canyon", "White mountain", "Papaya Island", "Cloud Hill", "Ruins", "Underwater Temple", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?"];
@@ -727,29 +769,163 @@
 	        var polyline = L.polyline(town_paths[t][p]['path'], {smoothFactor:5.0, color:town_paths[t][p]['color']});
 	        const popupText = `<h3>NPC: ${town_paths[t][p]['name']}</h3> <p style="color: '${town_paths[t][p]['color']}'">Town: ${town_names[t]} (${t}) Path: ${p}</p> <p>This path has ${town_paths[t][p]['path'].length} points</p>`;
             polyline.bindPopup(popupText).openPopup();
-            people_paths.push(polyline);
+            npcs_paths.push(polyline);
         }
 	}
+
+	// Setup course name markers
+    var course_markers = [];
+    for (m = 0; m < course_data.length; m++) {
+        const marker_data = course_data[m];
+        //console.log([marker_data[5],marker_data[6]]);
+        const marker = L.marker([marker_data[5]+400,marker_data[6]], {
+          draggable: false,
+        });//.addTo(map);
+        course_markers.push(marker);
+        const popupText = marker_data[1].toString();
+        marker.bindPopup(popupText).openPopup();
+        marker.on('dragend', function(e) {
+          marker.getPopup().setContent(marker.getLatLng().toString()).openOn(map);
+          console.log("[\""+marker_data[0]+"\", \""+marker_data[1]+"\", \""+marker_data[2]+"\", \""+marker_data[3]+"\", \""+marker_data[4]+"\", "+marker.getLatLng().lat+", "+marker.getLatLng().lng+"],");
+          //console.log(marker.getLatLng());
+        });
+    }
+    for (m = 0; m < action_data.length; m++) {
+        const marker_data = action_data[m];
+        //console.log([marker_data[5],marker_data[6]]);
+        const marker = L.marker([marker_data[5]+400,marker_data[6]], {
+          draggable: false,
+        });//.addTo(map);
+        course_markers.push(marker);
+        const popupText = marker_data[1].toString();
+        marker.bindPopup(popupText).openPopup();
+        marker.on('dragend', function(e) {
+          marker.getPopup().setContent(marker.getLatLng().toString()).openOn(map);
+          console.log("[\""+marker_data[0]+"\", \""+marker_data[1]+"\", \""+marker_data[2]+"\", \""+marker_data[3]+"\", \""+marker_data[4]+"\", "+marker.getLatLng().lat+", "+marker.getLatLng().lng+"],");
+          //console.log(marker.getLatLng());
+        });
+    }
+    var course_paths = [];
+    for (var p = 0; p < cloud_hill_paths.length; p++) {
+        // TODO: npc names, info, different colour per line
+        // Correct path to this map
+        for (var point = 0; point < cloud_hill_paths[p]['path'].length; point++) {
+            latlng = cloud_hill_paths[p]['path'][point];
+            y = latlng[0] + 400;  // Adding 400 here to correct for image issues
+            x = latlng[1];
+            cloud_hill_paths[p]['path'][point] = [y, x];
+        }
+        var polyline = L.polyline(cloud_hill_paths[p]['path'], {smoothFactor:5.0, color:cloud_hill_paths[p]['color']});
+        const popupText = `<h3>NPC: ${cloud_hill_paths[p]['name']}</h3> <p style="color: '${cloud_hill_paths[p]['color']}'">Town: Cloud Hill (${t}) Path: ${p}</p> <p>This path has ${cloud_hill_paths[p]['path'].length} points</p>`;
+        polyline.bindPopup(popupText).openPopup();
+        course_paths.push(polyline);
+    }
+
+
     
-    // Marker groups
+    // World overlays, like markers
     var mg_towns = L.layerGroup(town_markers);
     var mg_quickpic = L.layerGroup(quickpic_markers);
 	var mg_coins = L.layerGroup(coin_markers);
 	var mg_gems = L.layerGroup(gem_markers);
-	var mg_people = L.layerGroup(people_markers);
-	var mg_npc_paths = L.layerGroup(people_paths);
-	var overlay_regions = L.layerGroup(regions);
-    var overlays = {
-		"People": mg_people,
+	var mg_npcs = L.layerGroup(npcs_markers);
+	var npc_paths = L.layerGroup(npcs_paths);
+	var world_overlay_regions = L.layerGroup(regions);
+    var world_overlays = {
+		"Characters": mg_npcs,
         "Towns" : mg_towns,
         "Quick Pics" : mg_quickpic,
 		"Coins": mg_coins,
 		"Gems": mg_gems,
-		"People Paths": mg_npc_paths,
-		"Regions": overlay_regions,
+		"Roaming NPCs": npc_paths,
+		"Regions": world_overlay_regions,
     }
+
+    // Course overlays
+    var course_names_overlay = L.layerGroup(course_markers);
+    var course_path_overlay = L.layerGroup(course_paths);
+
+    var course_overlays = {
+      "Names": course_names_overlay,
+      "Paths": course_path_overlay,
+    };
+
     //GROUP CONTROLS
-    L.control.layers(maps, overlays).addTo(map);
+    var control_layer = L.control.layers(maps, world_overlays).addTo(map);
+
+    var world_selected = true;
+
+    // Add on add/remove event to disable certain overlays, e.g for courses disable world overlays vice-versa
+	minimap_layer.on('add', function(e) {
+	    if (world_selected) {
+	      return;
+        }
+        world_selected = true;
+	    // Enable world overlays
+	    for (var name in world_overlays) {
+          control_layer.addOverlay(world_overlays[name], name);
+        }
+        // Disable course overlays
+	    for (var name in course_overlays) {
+	      map.removeLayer(course_overlays[name]);
+          control_layer.removeLayer(course_overlays[name]);
+        }
+	});
+	world_layer.on('add', function(e) {
+	    if (world_selected) {
+	      return;
+        }
+        world_selected = true;
+	    // Enable world overlays
+	    for (var name in world_overlays) {
+          control_layer.addOverlay(world_overlays[name], name);
+        }
+        // Disable course overlays
+	    for (var name in course_overlays) {
+	      map.removeLayer(course_overlays[name]);
+          control_layer.removeLayer(course_overlays[name]);
+        }
+	});
+	world_sea_layer.on('add', function(e) {
+	    if (world_selected) {
+	      return;
+        }
+        world_selected = true;
+	    // Enable world overlays
+	    for (var name in world_overlays) {
+          control_layer.addOverlay(world_overlays[name], name);
+        }
+        // Disable course overlays
+	    for (var name in course_overlays) {
+	      map.removeLayer(course_overlays[name]);
+          control_layer.removeLayer(course_overlays[name]);
+        }
+	});
+	course_layer.on('add', function(e) {
+	    if (!world_selected) {
+	      return;
+        }
+        world_selected = false;
+	    // Enable course overlays
+	    for (var name in course_overlays) {
+          control_layer.addOverlay(course_overlays[name], name);
+        }
+        // Disable world overlays
+	    for (var name in world_overlays) {
+	      map.removeLayer(world_overlays[name]);
+          control_layer.removeLayer(world_overlays[name]);
+        }
+	});
+	control_layer.addTo(map);
+	world_layer.addTo(map);
+	map.removeLayer(course_layer);
+	mg_towns.addTo(map);
+
+
+
+
+
+
 	map.attributionControl.addAttribution('<a href="https://www.takaratomy.co.jp/english/">Takara</a>');
 	map.attributionControl.addAttribution('<a href="http://www.e-game.co.jp/">E-Game</a>');
 	map.attributionControl.addAttribution('<a href="https://github.com/mholeys/roadtrip-choroq-tools">mholeys</a>');
