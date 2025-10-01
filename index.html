@@ -4,10 +4,12 @@
     <title>ChoroQ HG 2 World Map</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="scripts/leaflet.css">
+    <link rel="stylesheet" href="scripts/search/Leaflet.PinSearch.css">
     <script src="scripts/leaflet.js"></script>
-	<script src="scripts/Leaflet.PlaceNameLayer.js"></script>
+<!--	<script src="scripts/Leaflet.PlaceNameLayer.js"></script>-->
     <script src="scripts/leaflet.js"></script>
     <script src="scripts/paths.js"></script>
+    <script src="scripts/search/Leaflet.PinSearch.js"></script>
   </head>
 
   <body style="height: 100%;margin: 0;">
@@ -25,7 +27,7 @@
       // By specifying a factor, you specify what distance in meters one pixel occupies (as it still is CRS.Simple in all other regards).
       // In this case, I have a tile layer with 256px pieces, so Leaflet thinks it's only 256 meters wide.
       // I know the map is supposed to be 2048x2048 meters, so I specify a factor of 0.125 to multiply in both directions.
-      // In the actual project, I compute all that from the gdal2tiles tilemapresources.xml, 
+      // In the actual project, I compute all that from the gdal2tiles tilemapresources.xml,
       // which gives the necessary information about tilesizes, total bounds and units-per-pixel at different levels.
 
 
@@ -46,7 +48,7 @@
       },
       infinite: true
     });
-    
+
     var map = L.map('map', {
         center: [6800, 6800],
         zoom: 10,
@@ -54,12 +56,12 @@
         crs: L.CRS.pr,
         fullscreenControl: true,
     }).setView([0, 0], 0);
-    
+
     //Creating the Map
     var sw = map.unproject([0, 0], 4);  // Level 4, because this is the level where meters-per-pixel is exactly 1
     var ne = map.unproject([mapheight, mapwidth], 4);
     var layerbounds = new L.LatLngBounds(sw, ne);
-	
+
 	// Icons
 	var icon_gem_ruby = L.icon({
 		iconUrl:       'icons/gem_ruby.png',
@@ -131,7 +133,7 @@
 		tooltipAnchor: [16, -28],
 		shadowSize:  [0, 0]
 	});
-	
+
 	var icon_coin = L.icon({
 		iconUrl:       'icons/coin.png',
 		iconRetinaUrl: 'icons/coin.png',
@@ -142,7 +144,7 @@
 		tooltipAnchor: [16, -28],
 		shadowSize:  [0, 0]
 	});
-	
+
 
    var minimap_layer = L.tileLayer('tiles/minimap/{z}/{x}/{y}.jpeg', {
       continuousWorld: false,
@@ -184,7 +186,7 @@
 	//	bounds: layerbounds,
 	//	padding: 3
 	//}).addTo(map);
-	
+
     var maps = {
         "Minimap": minimap_layer,
         "World": world_layer,
@@ -193,7 +195,7 @@
     };
 
 
-    
+
     //Coordinate Finder
 	/*var marker = L.marker([13600, 13600], {
       draggable: true,
@@ -207,420 +209,420 @@
     });*/
 	//Markers
     var town_data = [
-		["town_peach_town", "Peach Town", "", "Q Garage", "Peach Town", 8834.521484375, 9301.025390625],
-		["town_fuji_city", "Fuji City", "", "Q Garage", "Fuji City", 6375.000000000001, 6621.533203125001],
-		["town_sandpolis", "Sandpolis", "", "Q Garage", "Sandpolis", 2326.708984375, 6347.607421875001],
-		["town_chestnut_canyon", "Chestnut Canyon", "", "Q Garage", "Chestnut Canyon", 5496.777343750001, 3868.1640625000005],
-		["town_mushrooom_road", "Mushroom Road", "", "Q Garage", "Mushroom Road", 7658.300781250001, 4170.3125],
-		["town_white_mountain", "White Mountain", "", "Q Garage", "White Mountain", 9291.89453125, 2661.2304687500005],
-		["town_papaya_island", "Papaya Island", "", "Q Garage", "Papaya Island", 9169.04296875, 12600.585937500002],
-		["town_my_city", "My City", "", "Q Garage", "My City", 2872.07, 9952.64],
+		{ marker: "town_peach_town", type: "Town", title: "Peach Town (Town)", place: "Q Garage", loc: [8834.521484375, 9301.025390625] },
+		{ marker: "town_fuji_city", type: "Town", title: "Fuji City (Town)", place: "Q Garage", loc: [6375.000000000001, 6621.533203125001] },
+		{ marker: "town_sandpolis", type: "Town", title: "Sand polis (Town)", place: "Q Garage", loc: [2326.708984375, 6347.607421875001] },
+		{ marker: "town_chestnut_canyon", type: "Town", title: "Chestnut Canyon (Town)", place: "Q Garage", loc: [5496.777343750001, 3868.1640625000005] },
+		{ marker: "town_mushrooom_road", type: "Town", title: "Mushroom Road (Town)", place: "Q Garage", loc: [7658.300781250001, 4170.3125] },
+		{ marker: "town_white_mountain", type: "Town", title: "White Mountain (Town)", place: "Q Garage", loc: [9291.89453125, 2661.2304687500005] },
+		{ marker: "town_papaya_island", type: "Town", title: "Papaya Island (Town)", place: "Q Garage", loc: [9169.04296875, 12600.585937500002] },
+		{ marker: "town_my_city", type: "Town", title: "My City (Town)", place: "Q Garage", loc: [2872.07, 9952.64] },
     ];
     var course_data = [
-      ["course_c00", "C00", "Peach Raceway", "", "", 8000, 0],
-      ["course_c00", "C01", "Peach Raceway II", "", "", 8000, 1600],
-      ["course_c00", "C02", "Temple Raceway", "", "", 8000, 3200],
-      ["course_c00", "C03", "Ninja Temple Raceway", "", "", 8000, 4800],
-      ["course_c00", "C04", "Desert Raceway", "", "", 8000, 6400],
-      ["course_c00", "C05", "Night Glow Raceway", "", "", 8000, 8000],
-      ["course_c00", "C06", "Snow Mountain Raceway", "", "", 8000, 9600],
-      ["course_c00", "C07", "Miner 49er Raceway", "", "", 8000, 11200],
-      ["course_c00", "C08", "Slick Track", "", "", 9600, 0],
-      ["course_c00", "C09", "Oval Raceway", "", "", 9600, 1600],
-      ["course_c00", "C10", "River Raceway", "", "", 9600, 3200],
-      ["course_c00", "C11", "Snow Mountain Raceway II", "", "", 9600, 4800],
-      ["course_c00", "C12", "Lava Run Raceway", "", "", 9600, 6400],
-      ["course_c00", "C13", "Sunny Beach Raceway", "", "", 9600, 8000],
-      ["course_c00", "C14", "Lagoon Raceway", "", "", 9600, 9600],
-      ["course_c00", "C15", "", "", "", 9600, 11200],
-      ["course_c00", "C16", "", "", "", 11200, 0],
-      ["course_c00", "C17", "", "", "", 11200, 1600],
-      ["course_c00", "C18", "Tin Raceway", "", "", 11200, 3200],
-      ["course_c00", "C19", "Tin Raceway (Night)", "", "", 11200, 4800],
-      ["course_c00", "C20", "Endurance Run", "", "", 11200, 6400],
+        { marker: "course_c00", type: "Course", file: "C00", title: "Peach Raceway (Race)", description: "", loc: [8000, 0] },
+        { marker: "course_c00", type: "Course", file: "C01", title: "Peach Raceway II (Race)", description: "", loc: [8000, 1600] },
+        { marker: "course_c00", type: "Course", file: "C02", title: "Temple Raceway (Race)", description: "", loc: [8000, 3200] },
+        { marker: "course_c00", type: "Course", file: "C03", title: "Ninja Temple Raceway (Race)", description: "", loc: [8000, 4800] },
+        { marker: "course_c00", type: "Course", file: "C04", title: "Desert Raceway (Race)", description: "", loc: [8000, 6400] },
+        { marker: "course_c00", type: "Course", file: "C05", title: "Night Glow Raceway (Race)", description: "", loc: [8000, 8000] },
+        { marker: "course_c00", type: "Course", file: "C06", title: "Snow Mountain Raceway (Race)", description: "", loc: [8000, 9600] },
+        { marker: "course_c00", type: "Course", file: "C07", title: "Miner 49er Raceway (Race)", description: "", loc: [8000, 11200] },
+        { marker: "course_c00", type: "Course", file: "C08", title: "Slick Track (Race)", description: "", loc: [9600, 0] },
+        { marker: "course_c00", type: "Course", file: "C09", title: "Oval Raceway (Race)", description: "", loc: [9600, 1600] },
+        { marker: "course_c00", type: "Course", file: "C10", title: "River Raceway (Race)", description: "", loc: [9600, 3200] },
+        { marker: "course_c00", type: "Course", file: "C11", title: "Snow Mountain Raceway II (Race)", description: "", loc: [9600, 4800] },
+        { marker: "course_c00", type: "Course", file: "C12", title: "Lava Run Raceway (Race)", description: "", loc: [9600, 6400] },
+        { marker: "course_c00", type: "Course", file: "C13", title: "Sunny Beach Raceway (Race)", description: "", loc: [9600, 8000] },
+        { marker: "course_c00", type: "Course", file: "C14", title: "Lagoon Raceway (Race)", description: "", loc: [9600, 9600] },
+        { marker: "course_c00", type: "Course", file: "C15", title: "No file", description: "", loc: [9600, 11200] },
+        { marker: "course_c00", type: "Course", file: "C16", title: "Left over debug map?", description: "", loc: [11200, 0] },
+        { marker: "course_c00", type: "Course", file: "C17", title: "No file", description: "", loc: [11200, 1600] },
+        { marker: "course_c00", type: "Course", file: "C18", title: "Tin Raceway (Race)", description: "", loc: [11200, 3200] },
+        { marker: "course_c00", type: "Course", file: "C19", title: "Tin Raceway (Night) (Race)", description: "", loc: [11200, 4800] },
+        { marker: "course_c00", type: "Course", file: "C20", title: "Endurance Run (Race)", description: "", loc: [11200, 6400] },
     ];
     var action_data = [
-      ["action_c00", "A00", "Treasure Hunting Maze", "", "", 6400, 0],
-      ["action_c00", "A01", "Sliding Door Race", "", "", 6400, 1600],
-      ["action_c00", "A02", "Highway Race", "", "", 6400, 3200],
-      ["action_c00", "A03", "Rock Climbing", "", "", 6400, 4800],
-      ["action_c00", "A04", "Drag Race", "", "", 6400, 6400],
-      ["action_c00", "A05", "Golf", "", "", 6400, 8000],
-      ["action_c00", "A06", "Roulette", "", "", 6400, 9600],
-      ["action_c00", "A07", "Figure 8", "", "", 6400, 11200],
-      ["action_c00", "A08", "Football", "", "", 4800, 0],
-      ["action_c00", "A09", "Rainbow Jump", "", "", 4800, 1600],
-      ["action_c00", "A10", "Tunnel Race", "", "", 4800, 3200],
-      ["action_c00", "A11", "Obstacle Course", "", "", 4800, 4800],
-      ["action_c00", "A12", "Which-way? Race", "", "", 4800, 6400],
-      ["action_c00", "A13", "Volcano Course", "", "", 4800, 8000],
-      ["action_c00", "A14", "Curling", "", "", 4800, 9600],
-      ["action_c00", "A15", "Barrel Dodging", "", "", 4800, 11200],
-      ["action_c00", "A16", "", "", "", 3200,  0],
-      ["action_c00", "A17", "Ski Jumping", "", "", 3200,  1600],
-      ["action_c00", "A18", "Fishing", "", "", 3200,  3200],
-      ["action_c00", "A19", "", "", "", 3200,  4800],
-      ["action_c00", "A20", "", "", "", 3200,  6400],
+        { marker: "action_c00", type: "Action", file: "A00", title: "Treasure Hunting Maze (Mini game)", description: "", loc: [6400, 0] },
+        { marker: "action_c00", type: "Action", file: "A01", title: "Sliding Door Race (Mini game)", description: "", loc: [6400, 1600] },
+        { marker: "action_c00", type: "Action", file: "A02", title: "Highway Race (Mini game)", description: "", loc: [6400, 3200] },
+        { marker: "action_c00", type: "Action", file: "A03", title: "Rock Climbing (Mini game)", description: "", loc: [6400, 4800] },
+        { marker: "action_c00", type: "Action", file: "A04", title: "Drag Race (Mini game)", description: "", loc: [6400, 6400] },
+        { marker: "action_c00", type: "Action", file: "A05", title: "Golf (Mini game)", description: "", loc: [6400, 8000] },
+        { marker: "action_c00", type: "Action", file: "A06", title: "Roulette (Mini game)", description: "", loc: [6400, 9600] },
+        { marker: "action_c00", type: "Action", file: "A07", title: "Figure 8 (Mini game)", description: "", loc: [6400, 11200] },
+        { marker: "action_c00", type: "Action", file: "A08", title: "Football (Mini game)", description: "", loc: [4800, 0] },
+        { marker: "action_c00", type: "Action", file: "A09", title: "Rainbow Jump (Mini game)", description: "", loc: [4800, 1600] },
+        { marker: "action_c00", type: "Action", file: "A10", title: "Tunnel Race (Mini game)", description: "", loc: [4800, 3200] },
+        { marker: "action_c00", type: "Action", file: "A11", title: "Obstacle Course (Mini game)", description: "", loc: [4800, 4800] },
+        { marker: "action_c00", type: "Action", file: "A12", title: "Which-way? Race (Mini game)", description: "", loc: [4800, 6400] },
+        { marker: "action_c00", type: "Action", file: "A13", title: "Volcano Course (Mini game)", description: "", loc: [4800, 8000] },
+        { marker: "action_c00", type: "Action", file: "A14", title: "Curling (Mini game)", description: "", loc: [4800, 9600] },
+        { marker: "action_c00", type: "Action", file: "A15", title: "Barrel Dodging (Mini game)", description: "", loc: [4800, 11200] },
+        { marker: "action_c00", type: "Action", file: "A16", title: "Cloud Hill Town (Town)", description: "", loc: [3200,  0] },
+        { marker: "action_c00", type: "Action", file: "A17", title: "Ski Jumping (Mini game)", description: "", loc: [3200,  1600] },
+        { marker: "action_c00", type: "Action", file: "A18", title: "Fishing (Mini game)", description: "", loc: [3200,  3200] },
+        { marker: "action_c00", type: "Action", file: "A19", title: "Beach Flag (Mini game)", description: "", loc: [3200,  4800] },
+        { marker: "action_c00", type: "Action", file: "A20", title: "Single Lap Race (Mini game)", description: "", loc: [3200,  6400] },
     ];
 
-    var quickpic_data = [	
-		["qp_01", "Quick-Pic 1", "", "Quick-Pic", "Peach Town", 9827.294921875, 9336.71875],
-		["qp_02", "Quick-Pic 2", "", "Quick-Pic", "Peach Town", 9752.587890625, 9594.04296875],
-		["qp_03", "Quick-Pic 3", "", "Quick-Pic", "Peach Town", 9483.642578125, 9242.08984375],
-		["qp_04", "Quick-Pic 4", "", "Quick-Pic", "Peach Town", 8890.13671875, 9108.447265625],
-		["qp_05", "Quick-Pic 5", "", "Quick-Pic", "Peach Town", 8934.9609375, 9295.21484375],
-		["qp_06", "Quick-Pic 6", "", "Quick-Pic", "Peach Town", 8838.671875, 9434.66796875],
-		["qp_07", "Quick-Pic 7", "", "Quick-Pic", "Peach Town", 8933.30078125, 9954.296875],
-		["qp_08", "Quick-Pic 8", "", "Quick-Pic", "Peach Town", 8507.470703125, 9537.59765625],
-		["qp_09", "Quick-Pic 9", "", "Quick-Pic", "Peach Town", 8800.48828125, 9350.830078125],
-		["qp_10", "Quick-Pic 10", "", "Quick-Pic", "Peach Town", 8793.84765625, 9369.921875],
-		["qp_11", "Quick-Pic 11", "", "Quick-Pic", "", 9829.78515625, 10788.525390625002],
-		["qp_12", "Quick-Pic 12", "", "Quick-Pic", "", 7704.785156250001, 8825.390625],
-		["qp_13", "Quick-Pic 13", "", "Quick-Pic", "", 8239.35546875, 6681.298828125001],
-		["qp_14", "Quick-Pic 14", "", "Quick-Pic", "", 8260.9375, 6682.128906250001], 
-		["qp_15", "Quick-Pic 15", "", "Quick-Pic", "", 8239.35546875, 6661.376953125001],
-		["qp_16", "Quick-Pic 16", "", "Quick-Pic", "", 8260.107421875, 6663.037109375001],
-		["qp_17", "Quick-Pic 17", "", "Quick-Pic", "Fuji City", 6225.585937500001, 6552.636718750001], 
-		["qp_18", "Quick-Pic 18", "", "Quick-Pic", "Fuji City", 6227.246093750001, 6187.402343750001], 
-		["qp_19", "Quick-Pic 19", "", "Quick-Pic", "Fuji City", 6174.121093750001, 6632.324218750001],
-		["qp_20", "Quick-Pic 20", "", "Quick-Pic", "Fuji City", 6038.818359375001, 6969.335937500001],
-		["qp_21", "Quick-Pic 21", "", "Quick-Pic", "Fuji City", 6036.328125000001, 6367.529296875001],
-		["qp_22", "Quick-Pic 22", "", "Quick-Pic", "Fuji City", 6067.041015625001, 6233.056640625001],
-		["qp_23", "Quick-Pic 23", "", "Quick-Pic", "Fuji City", 5878.613281250001, 6501.171875000001],
-		["qp_24", "Quick-Pic 24", "", "Quick-Pic", "Fuji City", 5965.771484375001, 5994.824218750001],
-		["qp_25", "Quick-Pic 25", "", "Quick-Pic", "Fuji City", 6396.582031250001, 6627.343750000001],
-		["qp_26", "Quick-Pic 26", "", "Quick-Pic", "Fuji City", 6341.796875000001, 6629.003906250001], 
-		["qp_27", "Quick-Pic 27", "", "Quick-Pic", "", 5192.138671875001, 6736.914062500001],
-		["qp_28", "Quick-Pic 28", "", "Quick-Pic", "My City", 3048.8769531250005, 10107.861328125],
-		["qp_29", "Quick-Pic 29", "", "Quick-Pic", "My City", 2988.2812500000005, 9924.4140625], 
-		["qp_30", "Quick-Pic 30", "", "Quick-Pic", "022", 2813.9648437500005, 7623.437500000001],
-		["qp_31", "Quick-Pic 31", "", "Quick-Pic", "022", 2983.3007812500005, 7774.511718750001],
-		["qp_32", "Quick-Pic 32", "", "Quick-Pic", "022", 2328.369140625, 7619.287109375001],
-		["qp_33", "Quick-Pic 33", "", "Quick-Pic", "022", 2330.859375, 7779.492187500001],
-		["qp_34", "Quick-Pic 34", "", "Quick-Pic", "022", 3462.2558593750005, 7618.457031250001],
-		["qp_35", "Quick-Pic 35", "", "Quick-Pic", "022", 3463.9160156250005, 7778.662109375001],
-		["qp_36", "Quick-Pic 36", "", "Quick-Pic", "Sandpolis", 2937.6464843750005, 6499.511718750001],
-		["qp_37", "Quick-Pic 37", "", "Quick-Pic", "Sandpolis", 3127.7343750000005, 6229.736328125001],
-		["qp_38", "Quick-Pic 38", "", "Quick-Pic", "Sandpolis", 2649.6093750000005, 6338.476562500001], 
-		["qp_39", "Quick-Pic 39", "", "Quick-Pic", "Sandpolis", 2646.2890625000005, 6418.164062500001], 
-		["qp_40", "Quick-Pic 40", "", "Quick-Pic", "Sandpolis", 2938.4765625000005, 6339.306640625001],
-		["qp_41", "Quick-Pic 41", "", "Quick-Pic", "Sandpolis", 2776.6113281250005, 6339.306640625001],
-		["qp_42", "Quick-Pic 42", "", "Quick-Pic", "Sandpolis", 2388.96484375, 6542.675781250001],
-		["qp_43", "Quick-Pic 43", "", "Quick-Pic", "Sandpolis", 2543.359375, 5989.843750000001], 
-		["qp_44", "Quick-Pic 44", "", "Quick-Pic", "Sandpolis", 2324.21875, 6298.632812500001], 
-		["qp_45", "Quick-Pic 45", "", "Quick-Pic", "Sandpolis", 2388.134765625, 6298.632812500001],
-		["qp_46", "Quick-Pic 46", "", "Quick-Pic", "Sandpolis", 2536.71875, 5900.195312500001], 
-		["qp_47", "Quick-Pic 47", "", "Quick-Pic", "Sandpolis", 3126.9042968750005, 6269.580078125001],
-		["qp_48", "Quick-Pic 48", "", "Quick-Pic", "", 2697.7539062500005, 4899.12109375],
-		["qp_49", "Quick-Pic 49", "", "Quick-Pic", "", 3297.0703125000005, 4897.4609375], 
-		["qp_50", "Quick-Pic 50", "", "Quick-Pic", "", 2697.7539062500005, 4499.0234375],
-		["qp_51", "Quick-Pic 51", "", "Quick-Pic", "", 3297.0703125000005, 4499.0234375], 
-		["qp_52", "Quick-Pic 52", "", "Quick-Pic", "", 3662.3046875000005, 5206.250000000001], 
-		["qp_53", "Quick-Pic 53", "", "Quick-Pic", "", 3709.6191406250005, 5845.410156250001],
-		["qp_54", "Quick-Pic 54", "", "Quick-Pic", "", 3708.7890625000005, 5886.083984375001],
-		["qp_55", "Quick-Pic 55", "", "Quick-Pic", "", 1925.7812500000002, 5617.968750000001], 
-		["qp_56", "Quick-Pic 56", "", "Quick-Pic", "", 1867.6757812500002, 5545.751953125001],
-		["qp_57", "Quick-Pic 57", "", "Quick-Pic", "", 1966.4550781250002, 5428.710937500001],
-		["qp_58", "Quick-Pic 58", "", "Quick-Pic", "", 4375.341796875, 4412.6953125],
-		["qp_59", "Quick-Pic 59", "", "Quick-Pic", "", 4372.8515625, 4423.486328125],
-		["qp_60", "Quick-Pic 60", "", "Quick-Pic", "Chestnut Canyon", 5357.324218750001, 3924.6093750000005], 
-		["qp_61", "Quick-Pic 61", "", "Quick-Pic", "Chestnut Canyon", 5490.136718750001, 3727.0507812500005], 
-		["qp_62", "Quick-Pic 62", "", "Quick-Pic", "Chestnut Canyon", 5544.921875000001, 3932.9101562500005], 
-		["qp_63", "Quick-Pic 63", "", "Quick-Pic", "Chestnut Canyon", 5486.816406250001, 3932.9101562500005],
-		["qp_64", "Quick-Pic 64", "", "Quick-Pic", "Chestnut Canyon", 5667.773437500001, 3668.9453125000005], 
-		["qp_65", "Quick-Pic 65", "", "Quick-Pic", "Mushroom Road", 7589.404296875001, 4169.482421875],
-		["qp_66", "Quick-Pic 66", "", "Quick-Pic", "Mushroom Road", 7645.019531250001, 4423.486328125], 
-		["qp_67", "Quick-Pic 67", "", "Quick-Pic", "Mushroom Road", 7669.921875000001, 4113.037109375],
-		["qp_68", "Quick-Pic 68", "", "Quick-Pic", "Mushroom Road", 7670.751953125001, 4134.619140625],
-		["qp_69", "Quick-Pic 69", "", "Quick-Pic", "Mushroom Road", 7525.488281250001, 4489.892578125],
-		["qp_70", "Quick-Pic 70", "", "Quick-Pic", "Mushroom Road", 8111.523437500001, 3657.3242187500005], 
-		["qp_71", "Quick-Pic 71", "", "Quick-Pic", "White Mountain", 9273.6328125, 3074.6093750000005],
-		["qp_72", "Quick-Pic 72", "", "Quick-Pic", "White Mountain", 9808.203125, 3528.6621093750005],
-		["qp_73", "Quick-Pic 73", "", "Quick-Pic", "White Mountain", 9133.349609375, 2714.3554687500005],
-		["qp_74", "Quick-Pic 74", "", "Quick-Pic", "White Mountain", 9403.955078125, 3214.0625000000005],
-		["qp_75", "Quick-Pic 75", "", "Quick-Pic", "White Mountain", 8868.5546875, 3688.8671875000005],
-		["qp_76", "Quick-Pic 76", "", "Quick-Pic", "White Mountain", 9315.966796875, 2642.1386718750005],
-		["qp_77", "Quick-Pic 77", "", "Quick-Pic", "White Mountain", 9265.33203125, 2642.1386718750005],
-		["qp_78", "Quick-Pic 78", "", "Quick-Pic", "White Mountain", 9329.248046875, 1516.5527343750002],
-		["qp_79", "Quick-Pic 79", "", "Quick-Pic", "White Mountain", 9369.091796875, 1516.5527343750002],
-		["qp_80", "Quick-Pic 80", "", "Quick-Pic", "", 8746.533203125, 4069.0429687500005],
-		["qp_81", "Quick-Pic 81", "", "Quick-Pic", "", 8822.0703125, 4319.7265625],
-		["qp_82", "Quick-Pic 82", "", "Quick-Pic", "", 8735.7421875, 4432.6171875], 
-		["qp_83", "Quick-Pic 83", "", "Quick-Pic", "", 8631.982421875, 5466.064453125001],
-		["qp_84", "Quick-Pic 84", "", "Quick-Pic", "", 8712.5, 5892.724609375001],
-		["qp_85", "Quick-Pic 85", "", "Quick-Pic", "", 8659.375, 6324.365234375001],
-		["qp_86", "Quick-Pic 86", "", "Quick-Pic", "", 9027.099609375, 7029.101562500001],
-		["qp_87", "Quick-Pic 87", "", "Quick-Pic", "Papaya Island", 8983.10546875, 12613.037109375002],
-		["qp_88", "Quick-Pic 88", "", "Quick-Pic", "Papaya Island", 9099.31640625, 12773.242187500002],
-		["qp_89", "Quick-Pic 89", "", "Quick-Pic", "Papaya Island", 9344.189453125, 13321.093750000002],
-		["qp_90", "Quick-Pic 90", "", "Quick-Pic", "Papaya Island", 9310.986328125, 13189.941406250002],
-		["qp_91", "Quick-Pic 91", "", "Quick-Pic", "Papaya Island", 9717.724609375, 12816.406250000002],
-		["qp_92", "Quick-Pic 92", "", "Quick-Pic", "Papaya Island", 9060.302734375, 13082.861328125002],
-		["qp_93", "Quick-Pic 93", "", "Quick-Pic", "Papaya Island", 9209.716796875, 12367.333984375002],
-		["qp_94", "Quick-Pic 94", "", "Quick-Pic", "Papaya Island", 9691.9921875, 12799.804687500002], 
-		["qp_95", "Quick-Pic 95", "", "Quick-Pic", "Papaya Island", 9179.00390625, 12571.533203125002],
-		["qp_96", "Quick-Pic 96", "", "Quick-Pic", "Papaya Island", 9174.0234375, 12637.109375000002], 
+    var quickpic_data = [
+		{ marker: "qp_01", title: "Quick-Pic 1", description: "", type: "Quick-Pic", town: "Peach Town", loc: [9827.294921875, 9336.71875] },
+		{ marker: "qp_02", title: "Quick-Pic 2", description: "", type: "Quick-Pic", town: "Peach Town", loc: [9752.587890625, 9594.04296875] },
+		{ marker: "qp_03", title: "Quick-Pic 3", description: "", type: "Quick-Pic", town: "Peach Town", loc: [9483.642578125, 9242.08984375] },
+		{ marker: "qp_04", title: "Quick-Pic 4", description: "", type: "Quick-Pic", town: "Peach Town", loc: [8890.13671875, 9108.447265625] },
+		{ marker: "qp_05", title: "Quick-Pic 5", description: "", type: "Quick-Pic", town: "Peach Town", loc: [8934.9609375, 9295.21484375] },
+		{ marker: "qp_06", title: "Quick-Pic 6", description: "", type: "Quick-Pic", town: "Peach Town", loc: [8838.671875, 9434.66796875] },
+		{ marker: "qp_07", title: "Quick-Pic 7", description: "", type: "Quick-Pic", town: "Peach Town", loc: [8933.30078125, 9954.296875] },
+		{ marker: "qp_08", title: "Quick-Pic 8", description: "", type: "Quick-Pic", town: "Peach Town", loc: [8507.470703125, 9537.59765625] },
+		{ marker: "qp_09", title: "Quick-Pic 9", description: "", type: "Quick-Pic", town: "Peach Town", loc: [8800.48828125, 9350.830078125] },
+		{ marker: "qp_10", title: "Quick-Pic 10", description: "", type: "Quick-Pic", town: "Peach Town", loc: [8793.84765625, 9369.921875] },
+		{ marker: "qp_11", title: "Quick-Pic 11", description: "", type: "Quick-Pic", town: "", loc: [9829.78515625, 10788.525390625002] },
+		{ marker: "qp_12", title: "Quick-Pic 12", description: "", type: "Quick-Pic", town: "", loc: [7704.785156250001, 8825.390625] },
+		{ marker: "qp_13", title: "Quick-Pic 13", description: "", type: "Quick-Pic", town: "", loc: [8239.35546875, 6681.298828125001] },
+		{ marker: "qp_14", title: "Quick-Pic 14", description: "", type: "Quick-Pic", town: "", loc: [8260.9375, 6682.128906250001] },
+		{ marker: "qp_15", title: "Quick-Pic 15", description: "", type: "Quick-Pic", town: "", loc: [8239.35546875, 6661.376953125001] },
+		{ marker: "qp_16", title: "Quick-Pic 16", description: "", type: "Quick-Pic", town: "", loc: [8260.107421875, 6663.037109375001] },
+		{ marker: "qp_17", title: "Quick-Pic 17", description: "", type: "Quick-Pic", town: "Fuji City", loc: [6225.585937500001, 6552.636718750001] },
+		{ marker: "qp_18", title: "Quick-Pic 18", description: "", type: "Quick-Pic", town: "Fuji City", loc: [6227.246093750001, 6187.402343750001] },
+		{ marker: "qp_19", title: "Quick-Pic 19", description: "", type: "Quick-Pic", town: "Fuji City", loc: [6174.121093750001, 6632.324218750001] },
+		{ marker: "qp_20", title: "Quick-Pic 20", description: "", type: "Quick-Pic", town: "Fuji City", loc: [6038.818359375001, 6969.335937500001] },
+		{ marker: "qp_21", title: "Quick-Pic 21", description: "", type: "Quick-Pic", town: "Fuji City", loc: [6036.328125000001, 6367.529296875001] },
+		{ marker: "qp_22", title: "Quick-Pic 22", description: "", type: "Quick-Pic", town: "Fuji City", loc: [6067.041015625001, 6233.056640625001] },
+		{ marker: "qp_23", title: "Quick-Pic 23", description: "", type: "Quick-Pic", town: "Fuji City", loc: [5878.613281250001, 6501.171875000001] },
+		{ marker: "qp_24", title: "Quick-Pic 24", description: "", type: "Quick-Pic", town: "Fuji City", loc: [5965.771484375001, 5994.824218750001] },
+		{ marker: "qp_25", title: "Quick-Pic 25", description: "", type: "Quick-Pic", town: "Fuji City", loc: [6396.582031250001, 6627.343750000001] },
+		{ marker: "qp_26", title: "Quick-Pic 26", description: "", type: "Quick-Pic", town: "Fuji City", loc: [6341.796875000001, 6629.003906250001] },
+		{ marker: "qp_27", title: "Quick-Pic 27", description: "", type: "Quick-Pic", town: "", loc: [5192.138671875001, 6736.914062500001] },
+		{ marker: "qp_28", title: "Quick-Pic 28", description: "", type: "Quick-Pic", town: "My City", loc: [3048.8769531250005, 10107.861328125] },
+		{ marker: "qp_29", title: "Quick-Pic 29", description: "", type: "Quick-Pic", town: "My City", loc: [2988.2812500000005, 9924.4140625] },
+		{ marker: "qp_30", title: "Quick-Pic 30", description: "", type: "Quick-Pic", town: "022", loc: [2813.9648437500005, 7623.437500000001] },
+		{ marker: "qp_31", title: "Quick-Pic 31", description: "", type: "Quick-Pic", town: "022", loc: [2983.3007812500005, 7774.511718750001] },
+		{ marker: "qp_32", title: "Quick-Pic 32", description: "", type: "Quick-Pic", town: "022", loc: [2328.369140625, 7619.287109375001] },
+		{ marker: "qp_33", title: "Quick-Pic 33", description: "", type: "Quick-Pic", town: "022", loc: [2330.859375, 7779.492187500001] },
+		{ marker: "qp_34", title: "Quick-Pic 34", description: "", type: "Quick-Pic", town: "022", loc: [3462.2558593750005, 7618.457031250001] },
+		{ marker: "qp_35", title: "Quick-Pic 35", description: "", type: "Quick-Pic", town: "022", loc: [3463.9160156250005, 7778.662109375001] },
+		{ marker: "qp_36", title: "Quick-Pic 36", description: "", type: "Quick-Pic", town: "Sandpolis", loc: [2937.6464843750005, 6499.511718750001] },
+		{ marker: "qp_37", title: "Quick-Pic 37", description: "", type: "Quick-Pic", town: "Sandpolis", loc: [3127.7343750000005, 6229.736328125001] },
+		{ marker: "qp_38", title: "Quick-Pic 38", description: "", type: "Quick-Pic", town: "Sandpolis", loc: [2649.6093750000005, 6338.476562500001] },
+		{ marker: "qp_39", title: "Quick-Pic 39", description: "", type: "Quick-Pic", town: "Sandpolis", loc: [2646.2890625000005, 6418.164062500001] },
+		{ marker: "qp_40", title: "Quick-Pic 40", description: "", type: "Quick-Pic", town: "Sandpolis", loc: [2938.4765625000005, 6339.306640625001] },
+		{ marker: "qp_41", title: "Quick-Pic 41", description: "", type: "Quick-Pic", town: "Sandpolis", loc: [2776.6113281250005, 6339.306640625001] },
+		{ marker: "qp_42", title: "Quick-Pic 42", description: "", type: "Quick-Pic", town: "Sandpolis", loc: [2388.96484375, 6542.675781250001] },
+		{ marker: "qp_43", title: "Quick-Pic 43", description: "", type: "Quick-Pic", town: "Sandpolis", loc: [2543.359375, 5989.843750000001] },
+		{ marker: "qp_44", title: "Quick-Pic 44", description: "", type: "Quick-Pic", town: "Sandpolis", loc: [2324.21875, 6298.632812500001] },
+		{ marker: "qp_45", title: "Quick-Pic 45", description: "", type: "Quick-Pic", town: "Sandpolis", loc: [2388.134765625, 6298.632812500001] },
+		{ marker: "qp_46", title: "Quick-Pic 46", description: "", type: "Quick-Pic", town: "Sandpolis", loc: [2536.71875, 5900.195312500001] },
+		{ marker: "qp_47", title: "Quick-Pic 47", description: "", type: "Quick-Pic", town: "Sandpolis", loc: [3126.9042968750005, 6269.580078125001] },
+		{ marker: "qp_48", title: "Quick-Pic 48", description: "", type: "Quick-Pic", town: "", loc: [2697.7539062500005, 4899.12109375] },
+		{ marker: "qp_49", title: "Quick-Pic 49", description: "", type: "Quick-Pic", town: "", loc: [3297.0703125000005, 4897.4609375] },
+		{ marker: "qp_50", title: "Quick-Pic 50", description: "", type: "Quick-Pic", town: "", loc: [2697.7539062500005, 4499.0234375] },
+		{ marker: "qp_51", title: "Quick-Pic 51", description: "", type: "Quick-Pic", town: "", loc: [3297.0703125000005, 4499.0234375] },
+		{ marker: "qp_52", title: "Quick-Pic 52", description: "", type: "Quick-Pic", town: "", loc: [3662.3046875000005, 5206.250000000001] },
+		{ marker: "qp_53", title: "Quick-Pic 53", description: "", type: "Quick-Pic", town: "", loc: [3709.6191406250005, 5845.410156250001] },
+		{ marker: "qp_54", title: "Quick-Pic 54", description: "", type: "Quick-Pic", town: "", loc: [3708.7890625000005, 5886.083984375001] },
+		{ marker: "qp_55", title: "Quick-Pic 55", description: "", type: "Quick-Pic", town: "", loc: [1925.7812500000002, 5617.968750000001] },
+		{ marker: "qp_56", title: "Quick-Pic 56", description: "", type: "Quick-Pic", town: "", loc: [1867.6757812500002, 5545.751953125001] },
+		{ marker: "qp_57", title: "Quick-Pic 57", description: "", type: "Quick-Pic", town: "", loc: [1966.4550781250002, 5428.710937500001] },
+		{ marker: "qp_58", title: "Quick-Pic 58", description: "", type: "Quick-Pic", town: "", loc: [4375.341796875, 4412.6953125] },
+		{ marker: "qp_59", title: "Quick-Pic 59", description: "", type: "Quick-Pic", town: "", loc: [4372.8515625, 4423.486328125] },
+		{ marker: "qp_60", title: "Quick-Pic 60", description: "", type: "Quick-Pic", town: "Chestnut Canyon", loc: [5357.324218750001, 3924.6093750000005] },
+		{ marker: "qp_61", title: "Quick-Pic 61", description: "", type: "Quick-Pic", town: "Chestnut Canyon", loc: [5490.136718750001, 3727.0507812500005] },
+		{ marker: "qp_62", title: "Quick-Pic 62", description: "", type: "Quick-Pic", town: "Chestnut Canyon", loc: [5544.921875000001, 3932.9101562500005] },
+		{ marker: "qp_63", title: "Quick-Pic 63", description: "", type: "Quick-Pic", town: "Chestnut Canyon", loc: [5486.816406250001, 3932.9101562500005] },
+		{ marker: "qp_64", title: "Quick-Pic 64", description: "", type: "Quick-Pic", town: "Chestnut Canyon", loc: [5667.773437500001, 3668.9453125000005] },
+		{ marker: "qp_65", title: "Quick-Pic 65", description: "", type: "Quick-Pic", town: "Mushroom Road", loc: [7589.404296875001, 4169.482421875] },
+		{ marker: "qp_66", title: "Quick-Pic 66", description: "", type: "Quick-Pic", town: "Mushroom Road", loc: [7645.019531250001, 4423.486328125] },
+		{ marker: "qp_67", title: "Quick-Pic 67", description: "", type: "Quick-Pic", town: "Mushroom Road", loc: [7669.921875000001, 4113.037109375] },
+		{ marker: "qp_68", title: "Quick-Pic 68", description: "", type: "Quick-Pic", town: "Mushroom Road", loc: [7670.751953125001, 4134.619140625] },
+		{ marker: "qp_69", title: "Quick-Pic 69", description: "", type: "Quick-Pic", town: "Mushroom Road", loc: [7525.488281250001, 4489.892578125] },
+		{ marker: "qp_70", title: "Quick-Pic 70", description: "", type: "Quick-Pic", town: "Mushroom Road", loc: [8111.523437500001, 3657.3242187500005] },
+		{ marker: "qp_71", title: "Quick-Pic 71", description: "", type: "Quick-Pic", town: "White Mountain", loc: [9273.6328125, 3074.6093750000005] },
+		{ marker: "qp_72", title: "Quick-Pic 72", description: "", type: "Quick-Pic", town: "White Mountain", loc: [9808.203125, 3528.6621093750005] },
+		{ marker: "qp_73", title: "Quick-Pic 73", description: "", type: "Quick-Pic", town: "White Mountain", loc: [9133.349609375, 2714.3554687500005] },
+		{ marker: "qp_74", title: "Quick-Pic 74", description: "", type: "Quick-Pic", town: "White Mountain", loc: [9403.955078125, 3214.0625000000005] },
+		{ marker: "qp_75", title: "Quick-Pic 75", description: "", type: "Quick-Pic", town: "White Mountain", loc: [8868.5546875, 3688.8671875000005] },
+		{ marker: "qp_76", title: "Quick-Pic 76", description: "", type: "Quick-Pic", town: "White Mountain", loc: [9315.966796875, 2642.1386718750005] },
+		{ marker: "qp_77", title: "Quick-Pic 77", description: "", type: "Quick-Pic", town: "White Mountain", loc: [9265.33203125, 2642.1386718750005] },
+		{ marker: "qp_78", title: "Quick-Pic 78", description: "", type: "Quick-Pic", town: "White Mountain", loc: [9329.248046875, 1516.5527343750002] },
+		{ marker: "qp_79", title: "Quick-Pic 79", description: "", type: "Quick-Pic", town: "White Mountain", loc: [9369.091796875, 1516.5527343750002] },
+		{ marker: "qp_80", title: "Quick-Pic 80", description: "", type: "Quick-Pic", town: "", loc: [8746.533203125, 4069.0429687500005] },
+		{ marker: "qp_81", title: "Quick-Pic 81", description: "", type: "Quick-Pic", town: "", loc: [8822.0703125, 4319.7265625] },
+		{ marker: "qp_82", title: "Quick-Pic 82", description: "", type: "Quick-Pic", town: "", loc: [8735.7421875, 4432.6171875] },
+		{ marker: "qp_83", title: "Quick-Pic 83", description: "", type: "Quick-Pic", town: "", loc: [8631.982421875, 5466.064453125001] },
+		{ marker: "qp_84", title: "Quick-Pic 84", description: "", type: "Quick-Pic", town: "", loc: [8712.5, 5892.724609375001] },
+		{ marker: "qp_85", title: "Quick-Pic 85", description: "", type: "Quick-Pic", town: "", loc: [8659.375, 6324.365234375001] },
+		{ marker: "qp_86", title: "Quick-Pic 86", description: "", type: "Quick-Pic", town: "", loc: [9027.099609375, 7029.101562500001] },
+		{ marker: "qp_87", title: "Quick-Pic 87", description: "", type: "Quick-Pic", town: "Papaya Island", loc: [8983.10546875, 12613.037109375002] },
+		{ marker: "qp_88", title: "Quick-Pic 88", description: "", type: "Quick-Pic", town: "Papaya Island", loc: [9099.31640625, 12773.242187500002] },
+		{ marker: "qp_89", title: "Quick-Pic 89", description: "", type: "Quick-Pic", town: "Papaya Island", loc: [9344.189453125, 13321.093750000002] },
+		{ marker: "qp_90", title: "Quick-Pic 90", description: "", type: "Quick-Pic", town: "Papaya Island", loc: [9310.986328125, 13189.941406250002] },
+		{ marker: "qp_91", title: "Quick-Pic 91", description: "", type: "Quick-Pic", town: "Papaya Island", loc: [9717.724609375, 12816.406250000002] },
+		{ marker: "qp_92", title: "Quick-Pic 92", description: "", type: "Quick-Pic", town: "Papaya Island", loc: [9060.302734375, 13082.861328125002] },
+		{ marker: "qp_93", title: "Quick-Pic 93", description: "", type: "Quick-Pic", town: "Papaya Island", loc: [9209.716796875, 12367.333984375002] },
+		{ marker: "qp_94", title: "Quick-Pic 94", description: "", type: "Quick-Pic", town: "Papaya Island", loc: [9691.9921875, 12799.804687500002] },
+		{ marker: "qp_95", title: "Quick-Pic 95", description: "", type: "Quick-Pic", town: "Papaya Island", loc: [9179.00390625, 12571.533203125002] },
+		{ marker: "qp_96", title: "Quick-Pic 96", description: "", type: "Quick-Pic", town: "Papaya Island", loc: [9174.0234375, 12637.109375000002] },
     ];
-	
+
 	var coin_data = [
-		["coin_1", "Coin 1", "", "Coin",     9235, 2751],
-		["coin_2", "Coin 2", "", "Coin",     4963, 3459],
-		["coin_3", "Coin 3", "", "Coin",     1500, 4937],
-		["coin_4", "Coin 4", "", "Coin",     5575, 6555],
-		["coin_5", "Coin 5", "", "Coin",     8990, 3563.5],
-		["coin_6", "Coin 6", "", "Coin",     10465, 3500],
-		["coin_7", "Coin 7", "", "Coin",     1648, 5710],
-		["coin_8", "Coin 8", "", "Coin",     2404, 7720],
-		["coin_9", "Coin 9", "", "Coin",     5353.5, 3733],
-		["coin_10", "Coin 10", "", "Coin",   8352, 4440],
-		["coin_11", "Coin 11", "", "Coin",   9383.5, 3250.5],
-		["coin_12", "Coin 12", "", "Coin",   3830, 4609],
-		["coin_13", "Coin 13", "", "Coin",   2736, 6449],
-		["coin_14", "Coin 14", "", "Coin",   2165, 6152],
-		["coin_15", "Coin 15", "", "Coin",   1210, 6680],
-		["coin_16", "Coin 16", "", "Coin",   2600, 4100],
-		["coin_17", "Coin 17", "", "Coin",   7295.5, 8825.5],
-		["coin_18", "Coin 18", "", "Coin",   5661, 6228],
-		["coin_19", "Coin 19", "", "Coin",   8665, 13074],
-		["coin_20", "Coin 20", "", "Coin",   9990, 8660],
-		["coin_21", "Coin 21", "", "Coin",   1749.5, 7705.5],
-		["coin_22", "Coin 22", "", "Coin",   3263.5, 5197],
-		["coin_23", "Coin 23", "", "Coin",   5010, 3890],
-		["coin_24", "Coin 24", "", "Coin",   5676, 6940],
-		["coin_25", "Coin 25", "", "Coin",   8303, 6240],
-		["coin_26", "Coin 26", "", "Coin",   8578, 3682],
-		["coin_27", "Coin 27", "", "Coin",   8932, 13342.5],
-		["coin_28", "Coin 28", "", "Coin",   9415, 8256],
-		["coin_29", "Coin 29", "", "Coin",   7760, 3590],
-		["coin_30", "Coin 30", "", "Coin",   8400.3, 9441.5],
-		["coin_31", "Coin 31", "", "Coin",   8413.8, 9660],
-		["coin_32", "Coin 32", "", "Coin",   9212, 10867.8],
-		["coin_33", "Coin 33", "", "Coin",   2780, 10662],
-		["coin_34", "Coin 34", "", "Coin",   8687, 4352],
-		["coin_35", "Coin 35", "", "Coin",   8553, 9387.4],
-		["coin_36", "Coin 36", "", "Coin",   7178.7, 4547.5],
-		["coin_37", "Coin 37", "", "Coin",   10490, 2728.75],
-		["coin_38", "Coin 38", "", "Coin",   9045.6, 9246.3],
-		["coin_39", "Coin 39", "", "Coin",   8574, 12523],
-		["coin_40", "Coin 40", "", "Coin",   2800, 4900],
-		["coin_41", "Coin 41", "", "Coin",   8951.42, 1367.85],
-		["coin_42", "Coin 42", "", "Coin",   8832, 12400],
-		["coin_43", "Coin 43", "", "Coin",   5561, 6156],
-		["coin_44", "Coin 44", "", "Coin",   2500, 5540],
-		["coin_45", "Coin 45", "", "Coin",   9003, 2790],
-		["coin_46", "Coin 46", "", "Coin",   8735, 6314],
-		["coin_47", "Coin 47", "", "Coin",   2656, 7796],
-		["coin_48", "Coin 48", "", "Coin",   4304, 7327],
-		["coin_49", "Coin 49", "", "Coin",   4787, 6701],
-		["coin_50", "Coin 50", "", "Coin",   2620, 6793],
-		["coin_51", "Coin 51", "", "Coin",   7607, 6122],
-		["coin_52", "Coin 52", "", "Coin",   5998.5, 6634],
-		["coin_53", "Coin 53", "", "Coin",   5288, 6760],
-		["coin_54", "Coin 54", "", "Coin",   9254, 6791],
-		["coin_55", "Coin 55", "", "Coin",   7246.4, 4172],
-		["coin_56", "Coin 56", "", "Coin",   8604.2, 9221.6],
-		["coin_57", "Coin 57", "", "Coin",   5445, 6606],
-		["coin_58", "Coin 58", "", "Coin",   9225, 12768],
-		["coin_59", "Coin 59", "", "Coin",   7144, 3961],
-		["coin_60", "Coin 60", "", "Coin",   7774, 3633],
-		["coin_61", "Coin 61", "", "Coin",   9105.5, 13035],
-		["coin_62", "Coin 62", "", "Coin",   2473, 6098],
-		["coin_63", "Coin 63", "", "Coin",   5078, 3740],
-		["coin_64", "Coin 64", "", "Coin",   9250, 2980],
-		["coin_65", "Coin 65", "", "Coin",   7969, 9411],
-		["coin_66", "Coin 66", "", "Coin",   5891.5, 6168.5],
-		["coin_67", "Coin 67", "", "Coin",   5198.5, 3893.5],
-		["coin_68", "Coin 68", "", "Coin",   8902, 13111],
-		["coin_69", "Coin 69", "", "Coin",   9071, 2697],
-		["coin_70", "Coin 70", "", "Coin",   6942, 8157],
-		["coin_71", "Coin 71", "", "Coin",   2271, 5637],
-		["coin_72", "Coin 72", "", "Coin",   8664, 12919.72],
-		["coin_73", "Coin 73", "", "Coin",   9469.5, 3490],
-		["coin_74", "Coin 74", "", "Coin",   9573, 9509],
-		["coin_75", "Coin 75", "", "Coin",   8477.3, 9144.6],
-		["coin_76", "Coin 76", "", "Coin",   5808, 6094],
-		["coin_77", "Coin 77", "", "Coin",   7151, 6613],
-		["coin_78", "Coin 78", "", "Coin",   9433.3, 9502],
-		["coin_79", "Coin 79", "", "Coin",   8598, 1291],
-		["coin_80", "Coin 80", "", "Coin",   2743, 6230],
-		["coin_81", "Coin 81", "", "Coin",   3789, 8736.5],
-		["coin_82", "Coin 82", "", "Coin",   3479, 5655],
-		["coin_83", "Coin 83", "", "Coin",   8532, 12506],
-		["coin_84", "Coin 84", "", "Coin",   1499, 5329],
-		["coin_85", "Coin 85", "", "Coin",   10060, 10700],
-		["coin_86", "Coin 86", "", "Coin",   9356, 12860],
-		["coin_87", "Coin 87", "", "Coin",   8727.5, 7029.5],
-		["coin_88", "Coin 88", "", "Coin",   2417, 5862],
-		["coin_89", "Coin 89", "", "Coin",   2356, 6517],
-		["coin_90", "Coin 90", "", "Coin",   7657, 6694],
-		["coin_91", "Coin 91", "", "Coin",   9077, 3319],
-		["coin_92", "Coin 92", "", "Coin",   1973, 6797],
-		["coin_93", "Coin 93", "", "Coin",   6140, 6624],
-		["coin_94", "Coin 94", "", "Coin",   8286, 4240],
-		["coin_95", "Coin 95", "", "Coin",   7867.5, 6672],
-		["coin_96", "Coin 96", "", "Coin",   8823.5, 9302],
-		["coin_97", "Coin 97", "", "Coin",   1519, 10966],
-		["coin_98", "Coin 98", "", "Coin",   2519, 7611],
-		["coin_99", "Coin 99", "", "Coin",   9046, 3172.5],
-		["coin_100", "Coin 100", "", "Coin", 8528.5, 9988.3],
+		{ marker: "coin_1", title:"Coin 1", description: "", type: "Coin", loc: [9235, 2751] },
+		{ marker: "coin_2", title:"Coin 2", description: "", type: "Coin", loc: [4963, 3459] },
+		{ marker: "coin_3", title:"Coin 3", description: "", type: "Coin", loc: [1500, 4937] },
+		{ marker: "coin_4", title:"Coin 4", description: "", type: "Coin", loc: [5575, 6555] },
+		{ marker: "coin_5", title:"Coin 5", description: "", type: "Coin", loc: [8990, 3563.5] },
+		{ marker: "coin_6", title:"Coin 6", description: "", type: "Coin", loc: [10465, 3500] },
+		{ marker: "coin_7", title:"Coin 7", description: "", type: "Coin", loc: [1648, 5710] },
+		{ marker: "coin_8", title:"Coin 8", description: "", type: "Coin", loc: [2404, 7720] },
+		{ marker: "coin_9", title:"Coin 9", description: "", type: "Coin", loc: [5353.5, 3733] },
+		{ marker: "coin_10", title:"Coin 10", description: "", type: "Coin", loc: [8352, 4440] },
+		{ marker: "coin_11", title:"Coin 11", description: "", type: "Coin", loc: [9383.5, 3250.5] },
+		{ marker: "coin_12", title:"Coin 12", description: "", type: "Coin", loc: [3830, 4609] },
+		{ marker: "coin_13", title:"Coin 13", description: "", type: "Coin", loc: [2736, 6449] },
+		{ marker: "coin_14", title:"Coin 14", description: "", type: "Coin", loc: [2165, 6152] },
+		{ marker: "coin_15", title:"Coin 15", description: "", type: "Coin", loc: [1210, 6680] },
+		{ marker: "coin_16", title:"Coin 16", description: "", type: "Coin", loc: [2600, 4100] },
+		{ marker: "coin_17", title:"Coin 17", description: "", type: "Coin", loc: [7295.5, 8825.5] },
+		{ marker: "coin_18", title:"Coin 18", description: "", type: "Coin", loc: [5661, 6228] },
+		{ marker: "coin_19", title:"Coin 19", description: "", type: "Coin", loc: [8665, 13074] },
+		{ marker: "coin_20", title:"Coin 20", description: "", type: "Coin", loc: [9990, 8660] },
+		{ marker: "coin_21", title:"Coin 21", description: "", type: "Coin", loc: [1749.5, 7705.5] },
+		{ marker: "coin_22", title:"Coin 22", description: "", type: "Coin", loc: [3263.5, 5197] },
+		{ marker: "coin_23", title:"Coin 23", description: "", type: "Coin", loc: [5010, 3890] },
+		{ marker: "coin_24", title:"Coin 24", description: "", type: "Coin", loc: [5676, 6940] },
+		{ marker: "coin_25", title:"Coin 25", description: "", type: "Coin", loc: [8303, 6240] },
+		{ marker: "coin_26", title:"Coin 26", description: "", type: "Coin", loc: [8578, 3682] },
+		{ marker: "coin_27", title:"Coin 27", description: "", type: "Coin", loc: [8932, 13342.5] },
+		{ marker: "coin_28", title:"Coin 28", description: "", type: "Coin", loc: [9415, 8256] },
+		{ marker: "coin_29", title:"Coin 29", description: "", type: "Coin", loc: [7760, 3590] },
+		{ marker: "coin_30", title:"Coin 30", description: "", type: "Coin", loc: [8400.3, 9441.5] },
+		{ marker: "coin_31", title:"Coin 31", description: "", type: "Coin", loc: [8413.8, 9660] },
+		{ marker: "coin_32", title:"Coin 32", description: "", type: "Coin", loc: [9212, 10867.8] },
+		{ marker: "coin_33", title:"Coin 33", description: "", type: "Coin", loc: [2780, 10662] },
+		{ marker: "coin_34", title:"Coin 34", description: "", type: "Coin", loc: [8687, 4352] },
+		{ marker: "coin_35", title:"Coin 35", description: "", type: "Coin", loc: [8553, 9387.4] },
+		{ marker: "coin_36", title:"Coin 36", description: "", type: "Coin", loc: [7178.7, 4547.5] },
+		{ marker: "coin_37", title:"Coin 37", description: "", type: "Coin", loc: [10490, 2728.75] },
+		{ marker: "coin_38", title:"Coin 38", description: "", type: "Coin", loc: [9045.6, 9246.3] },
+		{ marker: "coin_39", title:"Coin 39", description: "", type: "Coin", loc: [8574, 12523] },
+		{ marker: "coin_40", title:"Coin 40", description: "", type: "Coin", loc: [2800, 4900] },
+		{ marker: "coin_41", title:"Coin 41", description: "", type: "Coin", loc: [8951.42, 1367.85] },
+		{ marker: "coin_42", title:"Coin 42", description: "", type: "Coin", loc: [8832, 12400] },
+		{ marker: "coin_43", title:"Coin 43", description: "", type: "Coin", loc: [5561, 6156] },
+		{ marker: "coin_44", title:"Coin 44", description: "", type: "Coin", loc: [2500, 5540] },
+		{ marker: "coin_45", title:"Coin 45", description: "", type: "Coin", loc: [9003, 2790] },
+		{ marker: "coin_46", title:"Coin 46", description: "", type: "Coin", loc: [8735, 6314] },
+		{ marker: "coin_47", title:"Coin 47", description: "", type: "Coin", loc: [2656, 7796] },
+		{ marker: "coin_48", title:"Coin 48", description: "", type: "Coin", loc: [4304, 7327] },
+		{ marker: "coin_49", title:"Coin 49", description: "", type: "Coin", loc: [4787, 6701] },
+		{ marker: "coin_50", title:"Coin 50", description: "", type: "Coin", loc: [2620, 6793] },
+		{ marker: "coin_51", title:"Coin 51", description: "", type: "Coin", loc: [7607, 6122] },
+		{ marker: "coin_52", title:"Coin 52", description: "", type: "Coin", loc: [5998.5, 6634] },
+		{ marker: "coin_53", title:"Coin 53", description: "", type: "Coin", loc: [5288, 6760] },
+		{ marker: "coin_54", title:"Coin 54", description: "", type: "Coin", loc: [9254, 6791] },
+		{ marker: "coin_55", title:"Coin 55", description: "", type: "Coin", loc: [7246.4, 4172] },
+		{ marker: "coin_56", title:"Coin 56", description: "", type: "Coin", loc: [8604.2, 9221.6] },
+		{ marker: "coin_57", title:"Coin 57", description: "", type: "Coin", loc: [5445, 6606] },
+		{ marker: "coin_58", title:"Coin 58", description: "", type: "Coin", loc: [9225, 12768] },
+		{ marker: "coin_59", title:"Coin 59", description: "", type: "Coin", loc: [7144, 3961] },
+		{ marker: "coin_60", title:"Coin 60", description: "", type: "Coin", loc: [7774, 3633] },
+		{ marker: "coin_61", title:"Coin 61", description: "", type: "Coin", loc: [9105.5, 13035] },
+		{ marker: "coin_62", title:"Coin 62", description: "", type: "Coin", loc: [2473, 6098] },
+		{ marker: "coin_63", title:"Coin 63", description: "", type: "Coin", loc: [5078, 3740] },
+		{ marker: "coin_64", title:"Coin 64", description: "", type: "Coin", loc: [9250, 2980] },
+		{ marker: "coin_65", title:"Coin 65", description: "", type: "Coin", loc: [7969, 9411] },
+		{ marker: "coin_66", title:"Coin 66", description: "", type: "Coin", loc: [5891.5, 6168.5] },
+		{ marker: "coin_67", title:"Coin 67", description: "", type: "Coin", loc: [5198.5, 3893.5] },
+		{ marker: "coin_68", title:"Coin 68", description: "", type: "Coin", loc: [8902, 13111] },
+		{ marker: "coin_69", title:"Coin 69", description: "", type: "Coin", loc: [9071, 2697] },
+		{ marker: "coin_70", title:"Coin 70", description: "", type: "Coin", loc: [6942, 8157] },
+		{ marker: "coin_71", title:"Coin 71", description: "", type: "Coin", loc: [2271, 5637] },
+		{ marker: "coin_72", title:"Coin 72", description: "", type: "Coin", loc: [8664, 12919.72] },
+		{ marker: "coin_73", title:"Coin 73", description: "", type: "Coin", loc: [9469.5, 3490] },
+		{ marker: "coin_74", title:"Coin 74", description: "", type: "Coin", loc: [9573, 9509] },
+		{ marker: "coin_75", title:"Coin 75", description: "", type: "Coin", loc: [8477.3, 9144.6] },
+		{ marker: "coin_76", title:"Coin 76", description: "", type: "Coin", loc: [5808, 6094] },
+		{ marker: "coin_77", title:"Coin 77", description: "", type: "Coin", loc: [7151, 6613] },
+		{ marker: "coin_78", title:"Coin 78", description: "", type: "Coin", loc: [9433.3, 9502] },
+		{ marker: "coin_79", title:"Coin 79", description: "", type: "Coin", loc: [8598, 1291] },
+		{ marker: "coin_80", title:"Coin 80", description: "", type: "Coin", loc: [2743, 6230] },
+		{ marker: "coin_81", title:"Coin 81", description: "", type: "Coin", loc: [3789, 8736.5] },
+		{ marker: "coin_82", title:"Coin 82", description: "", type: "Coin", loc: [3479, 5655] },
+		{ marker: "coin_83", title:"Coin 83", description: "", type: "Coin", loc: [8532, 12506] },
+		{ marker: "coin_84", title:"Coin 84", description: "", type: "Coin", loc: [1499, 5329] },
+		{ marker: "coin_85", title:"Coin 85", description: "", type: "Coin", loc: [10060, 10700] },
+		{ marker: "coin_86", title:"Coin 86", description: "", type: "Coin", loc: [9356, 12860] },
+		{ marker: "coin_87", title:"Coin 87", description: "", type: "Coin", loc: [8727.5, 7029.5] },
+		{ marker: "coin_88", title:"Coin 88", description: "", type: "Coin", loc: [2417, 5862] },
+		{ marker: "coin_89", title:"Coin 89", description: "", type: "Coin", loc: [2356, 6517] },
+		{ marker: "coin_90", title:"Coin 90", description: "", type: "Coin", loc: [7657, 6694] },
+		{ marker: "coin_91", title:"Coin 91", description: "", type: "Coin", loc: [9077, 3319] },
+		{ marker: "coin_92", title:"Coin 92", description: "", type: "Coin", loc: [1973, 6797] },
+		{ marker: "coin_93", title:"Coin 93", description: "", type: "Coin", loc: [6140, 6624] },
+		{ marker: "coin_94", title:"Coin 94", description: "", type: "Coin", loc: [8286, 4240] },
+		{ marker: "coin_95", title:"Coin 95", description: "", type: "Coin", loc: [7867.5, 6672] },
+		{ marker: "coin_96", title:"Coin 96", description: "", type: "Coin", loc: [8823.5, 9302] },
+		{ marker: "coin_97", title:"Coin 97", description: "", type: "Coin", loc: [1519, 10966] },
+		{ marker: "coin_98", title:"Coin 98", description: "", type: "Coin", loc: [2519, 7611] },
+		{ marker: "coin_99", title:"Coin 99", description: "", type: "Coin", loc: [9046, 3172.5] },
+		{ marker: "coin_100", title:"Coin 100", description: "", type: "Coin", loc: [8528.5, 9988.3] },
 	];
 
 	var gem_data = [
-		["ruby", "Red Ruby", 0xEC1C24, "Gem", 1939.06, 4924.02, icon_gem_ruby],
-		["sapphire", "Blue Sapphire", 0x3F48CC, "Gem", 2996.58, 4699.90, icon_gem_sapphire],
-		["emerald", "Green Emerald", 0x0ED145, "Gem", 9373.24, 1340.58, icon_gem_emerald],
-		["moonstone", "Violet Moonstone", 0xB83DBA, "Gem", 8502.49, 3439.01, icon_gem_moonstone],
-		["amethyst", "Red-Violet Amethyst", 0x88001B, "Gem", 9636.38, 2799.02, icon_gem_amethyst],
-		["topaz", "Yellow Topaz", 0xFFF200, "Gem", 8058.40, 6160.84, icon_gem_topaz],
-		["opal", "Black Opal", 0x585858, "Gem", 9606.49, 12766.60, icon_gem_opal],
+		{ marker: "ruby", title:"Red Ruby", description: "", color: 0xEC1C24, type: "Gem", loc: [1939.06, 4924.02], icon: icon_gem_ruby },
+		{ marker: "sapphire", title:"Blue Sapphire", description: "", color: 0x3F48CC, type: "Gem", loc: [2996.58, 4699.90], icon: icon_gem_sapphire },
+		{ marker: "emerald", title:"Green Emerald", description: "", color: 0x0ED145, type: "Gem", loc: [9373.24, 1340.58], icon: icon_gem_emerald },
+		{ marker: "moonstone", title:"Violet Moonstone", description: "", color: 0xB83DBA, type: "Gem", loc: [8502.49, 3439.01], icon: icon_gem_moonstone },
+		{ marker: "amethyst", title:"Red-Violet Amethyst", description: "", color: 0x88001B, type: "Gem", loc: [9636.38, 2799.02], icon: icon_gem_amethyst },
+		{ marker: "topaz", title:"Yellow Topaz", description: "", color: 0xFFF200, type: "Gem", loc: [8058.40, 6160.84], icon: icon_gem_topaz },
+		{ marker: "opal", title:"Black Opal", description: "", color: 0x585858, type: "Gem", loc: [9606.49, 12766.60], icon: icon_gem_opal },
 	];
-	
+
 	var building_data = [
-		["peach_qfactory", "Q's Factory", 8822.07, 9306.01 ],
-		["peach_parts", "Parts Shop", 8837.01, 9269.48],
-		["peach_body", "Body Shop", 8728.27, 9516.02],
-		["peach_paint", "Paint Shop", 8895.95, 9320.12],
-		["peach_bartender", "Bartender", 8823.73, 9633.06],
-		["peach_police", "Policeman", 8866.89, 9334.23],
-		["peach_peachfm", "Peach FM Front Desk", 8910.06, 9237.94],
-		["peach_kinsera", "Kinsera", 9459.57, 9272.8],
-		["peach_kevin_mum", "Kevin's mum", 8866.06, 9157.42],
-		["peach_wolf", "Wolf", 8939.94, 9267.82],
-		["peach_best", "Best", 9153.27, 9231.3],
-		["peach_jousset", "Jousset", 8958.2, 9135.84],
-		["peach_owner", "Owner", 8836.18, 9378.22],
-		["peach_grandpa_tal", "Grandpa Tal", 8925.83, 10002.44],
-		["peach_jones", "Jones", 9569.97, 9439.65],
-		["peach_fight", "Fight", 8774.76, 9614.79],
-		["peach_milton", "Milton", 9223, 9293.55],
-		["peach_barrel_cave", "Entrance to the cave", 8925, 9987.5],
-		["fuji_qfactory", "Q's Factory", 6375, 6626.51],
-		["fuji_parts", "Parts Shop", 6140.09, 6604.1],
-		["fuji_body", "Body Shop", 5681.05, 6382.47],
-		["fuji_paint", "Paint Shop", 6035.5, 6488.72],
-		["fuji_bartender", "Barkeeper", 6257.13, 6593.31],
-		["fuji_heizo", "Heizo", 6211.47, 6626.51],
-		["fuji_sale_assistant", "Echigoya sales assistant", 5961.62, 6307.76],
-		["fuji_nanaha", "Princess Nanaha", 5828.81, 6483.74],
-		["fuji_king", "King", 5908.5, 6554.3],
-		["fuji_maze_guard", "Guard of the maze", 5853.71, 6687.11],
-		["fuji_otomi", "Otomi", 6206.49, 6139.26],
-		["fuji_medium", "Spirit Mediums", 6282.86, 6169.14],
-		["fuji_cake_shop", "Dumpling Cake shop", 5917.63, 6008.94],
-		["fuji_uzumasa", "Uzumasa", 5781.49, 6386.62],
-		["fuji_iwasuke", "Iwasuke", 6070.36, 6919.53],
-		["fuji_hakosuke", "Hakosuke", 5679.39, 6743.55],
-		["fuji_nobizo", "Nobizo", 5849.56, 6341.8],
-		["fuji_natsuo", "Natsuo", 5280.13, 6665.53],
-		["fuji_hanako", "Hanako", 5684.38, 6483.74],
-		["sandpolis_qfactory", "Q's Factory", 2326.71, 6345.95],
-		["sandpolis_parts", "Parts Shop", 2380.66, 6411.52],
-		["sandpolis_body", "Body Shop", 2381.49, 6346.78],
-		["sandpolis_paint", "Paint Shop", 2327.54, 6411.52],
-		["sandpolis_bartender", "Bartender", 2593.16, 5950],
-		["sandpolis_police", "Captain Rombo", 2569.09, 6124.32],
-		["sandpolis_figure8", "Figure 8 Registration", 3012.35, 6658.06],
-		["sandpolis_football", "Football Registration,", 3037.26, 6255.47],
-		["sandpolis_roulette", "Roulette Registration", 3112.79, 6499.51],
-		["sandpolis_tony", "Tony", 2293.51, 6379.98],
-		["sandpolis_johnny", "Johnny", 2493.55, 5989.01],
-		["sandpolis_frank", "Frank", 2538.38, 6056.25],
-		["sandpolis_sebastian", "Sebastian", 2485.25, 6399.07],
-		["sandpolis_shop_manager", "Shop Manager", 3103.66, 6320.21],
-		["sandpolis_mr_king", "Mr. King", 2471.14, 6679.64],
-		["sandpolis_butch", "Butch", 2056.93, 5660.3],
-		["sandpolis_barton", "Barton", 2784.91, 6424.8],
-		["sandpolis_chocolat", "Chocolat", 3008.2, 6779.25],
-		["sandpolis_merci", "Merci", 2699.41, 6417.33],
-		["sandpolis_bob", "Bob", 2447.9, 6355.91],
-		["sandpolis_richard", "Richard", 2506.01, 6360.06],
-		["chestnut_qfactory", "Q's Factory", 5497.61, 3872.31],
-		["chestnut_bartender", "Bartender", 5571.48, 3890.58],
-		["chestnut_wallace", "Wallace", 5583.11, 3927.1],
-		["chestnut_gene", "Gene", 5287.6, 3966.94],
-		["chestnut_maya_carton", "Maya Carton", 5743.31, 3756.93],
-		["chestnut_rock_climbing", "Rock Climbing entrance", 5548.24, 3693.85],
-		["chestnut_mason", "Mason", 5618.8, 3634.08],
-		["chestnut_ross_rorke", "Ross Rorke", 5286.77, 3808.4],
-		["chestnut_tom", "Tom", 5466.06, 3990.19],
-		["chestnut_lowry", "Lowry", 5485.99, 3988.53],
-		["chestnut_betty", "Betty", 5547.41, 3970.26],
-		["chestnut_lucy", "Lucy", 5546.58, 3988.53],
-		["mushroom_qfactory", "Q's Factory", 7659.13, 4171.14],
-		["mushroom_parts", "Parts Shop", 7629.25, 4189.4],
-		["mushroom_bartender", "Bartender", 7587.74, 4509.81],
-		["mushroom_jumbo", "Jumbo", 7528.81, 4469.97],
-		["mushroom_goddess", "Goddess", 7646.68, 4469.97 ],
-		["white_mt_qfactory", "Q's Factory", 9290.23, 2658.74],
-		["white_mt_parts", "Parts Shop", 9360.79, 2869.58],
-		["white_mt_body", "Body Shop", 9349.17, 2668.7],
-		["white_mt_paint", "Paint Shop", 9340.04, 2899.46],
-		["white_mt_bartender", "Bartender", 9250.39, 2875.39],
-		["white_mt_police", "Policeman", 9189.79, 2674.51],
-		["white_mt_merrin", "Merrin", 9627.25, 2979.15],
-		["white_mt_ski_jump", "Ski Jumping Registration", 9622.27, 2730.13],
-		["white_mt_grandma_dizzy", "Grandma Dizzy", 9482.81, 3100.34],
-		["white_mt_lettar", "Lettar", 9299.37, 2898.63],
-		["white_mt_santa", "Santa Claus", 9867.14, 3499.61],
-		["white_mt_keitel", "Keitel", 9437.16, 3557.71],
-		["white_mt_ross", "Ross", 9318.46, 3556.05],
-		["white_mt_busheme", "Busheme", 9258.69, 3555.22],
-		["white_mt_madison", "Madison", 9198.1, 3555.22],
-		["white_mt_bunger", "Bunger", 9135.01, 3556.05],
-		["white_mt_emily", "Emily", 9374.07, 3189.16],
-		["white_mt_bigfoot", "Bigfoot Joe", 9762.55, 3250.59],
-		["white_mt_curling", "Curling Registration", 9456.25, 3307.86],
-		["white_mt_kate", "Kate", 9193.12, 2868.75 ],
-		["papaya_island_qfactory", "Q's Factory", 9174.02, 12602.25],
-		["papaya_island_parts", "Parts Shop", 9134.18, 12708.5],
-		["papaya_island_body", "Body Shop", 9012.99, 12500.98],
-		["papaya_island_bartender", "Bartender", 9220.51, 12454.49],
-		["papaya_island_police", "Policeman", 9180.66, 12544.14],
-		["papaya_island_obstacle", "Obstacle Course Registration", 9655.47, 12872.85],
-		["papaya_island_papaya_mayor", "Papaya Mayor", 9210.55, 12414.65],
-		["papaya_island_luke", "Luke", 8989.75, 12537.5],
-		["papaya_island_granpa_costello", "Grandpa Costello", 9736.82, 12847.95],
-		["papaya_island_andy", "Andy", 9114.26, 12740.04],
-		["papaya_island_shirley", "Shirley", 8920.02, 12603.91],
-		["papaya_island_casa", "Casa", 9369.92, 13321.09],
-		["papaya_island_sandro", "Sandro", 9717.72, 12949.22],
-		["papaya_island_micky", "Micky", 9150.78, 12663.67],
-		["papaya_island_daniel", "Daniel", 9723.54, 12909.38],
-		["papaya_island_shimisa", "Shimisa", 9202.25, 12313.38],
-		["papaya_island_romba", "Romba", 9296.88, 13120.21],
-		["papaya_island_pollepolle", "Pollepolle", 9063.62, 13134.33],
-		["my_city_qfactory", "Q's Factory", 2919.38, 9830.62],
-		["my_city_parts", "Parts Shop", 2858.79, 9924.41],
-		["my_city_body", "Body Shop", 3106.98, 10091.26],
-		["my_city_paint", "Paint Shop", 3122.75, 9863.82],
-		["my_city_police", "Accel", 2919.38, 9918.6],
-		["my_city_2nd_shop", "Second-hand shop", 2979.15, 9867.97],
-		["my_city_estate_agent", "Wonder Estate Agency", 2974.17, 9760.89],
-		["my_city_manei", "Manei", 3055.52, 9879.59],
-		["my_city_george", "George", 3024.8, 9950.15],
-		["my_city_roberts", "Roberts", 2911.08, 10116.99],
-		["my_city_dayan", "Dayan", 2921.04, 9951.81],
-		["my_city_brian", "Brian", 2852.98, 9880.42],
-		["my_city_roji", "Roji, teacher", 2615.58, 9900.34],
-		["my_city_coine", "Coine", 2770.8, 9959.28],
-		["my_city_kuwano", "Kuwano", 2788.23, 9879.59],
-		["my_city_mien", "Mien", 2769.14, 10116.99],
-		["my_city_flower", "Flower", 2705.22, 9931.88],
-		["my_city_gichi", "Gichi", 2696.92, 10014.06],
-		["my_city_akiban", "Akiban", 2768.31, 10064.7],
-		["my_city_sally", "Sally", 2706.05, 9872.95],
-		["my_city_rally", "Rally Center", 3141.02, 9899.51],
-		["_laz", "Laz", 8787.21, 6169.14],
-		["_ufo", "UFO", 3897.22, 5699.32],
-		["_benji", "Benji", 2896.14, 5100.83],
-		["lighthousr_picarl", "Picarl", 1899.22, 5336.57],
-		["202_seidon", "Seidon", 9344.19, 1343.9],
+		{ marker: "peach_qfactory", title:"Q's Factory (Building)", loc: [8822.07, 9306.01 ] },
+		{ marker: "peach_parts", title:"Parts Shop (Building)", loc: [8837.01, 9269.48] },
+		{ marker: "peach_body", title:"Body Shop (Building)", loc: [8728.27, 9516.02] },
+		{ marker: "peach_paint", title:"Paint Shop (Building)", loc: [8895.95, 9320.12] },
+		{ marker: "peach_bartender", title:"Bartender (Building)", loc: [8823.73, 9633.06] },
+		{ marker: "peach_police", title:"Policeman (Building)", loc: [8866.89, 9334.23] },
+		{ marker: "peach_peachfm", title:"Peach FM Front Desk (Building)", loc: [8910.06, 9237.94] },
+		{ marker: "peach_kinsera", title:"Kinsera (Building)", loc: [9459.57, 9272.8] },
+		{ marker: "peach_kevin_mum", title:"Kevin's mum (Building)", loc: [8866.06, 9157.42] },
+		{ marker: "peach_wolf", title:"Wolf (Building)", loc: [8939.94, 9267.82] },
+		{ marker: "peach_best", title:"Best (Building)", loc: [9153.27, 9231.3] },
+		{ marker: "peach_jousset", title:"Jousset (Building)", loc: [8958.2, 9135.84] },
+		{ marker: "peach_owner", title:"Owner (Building)", loc: [8836.18, 9378.22] },
+		{ marker: "peach_grandpa_tal", title:"Grandpa Tal (Building)", loc: [8925.83, 10002.44] },
+		{ marker: "peach_jones", title:"Jones (Building)", loc: [9569.97, 9439.65] },
+		{ marker: "peach_fight", title:"Fight (Building)", loc: [8774.76, 9614.79] },
+		{ marker: "peach_milton", title:"Milton (Building)", loc: [9223, 9293.55] },
+		{ marker: "peach_barrel_cave", title:"Entrance to the cave (Building)", loc: [8925, 9987.5] },
+		{ marker: "fuji_qfactory", title:"Q's Factory (Building)", loc: [6375, 6626.51] },
+		{ marker: "fuji_parts", title:"Parts Shop (Building)", loc: [6140.09, 6604.1] },
+		{ marker: "fuji_body", title:"Body Shop (Building)", loc: [5681.05, 6382.47] },
+		{ marker: "fuji_paint", title:"Paint Shop (Building)", loc: [6035.5, 6488.72] },
+		{ marker: "fuji_bartender", title:"Barkeeper (Building)", loc: [6257.13, 6593.31] },
+		{ marker: "fuji_heizo", title:"Heizo (Building)", loc: [6211.47, 6626.51] },
+		{ marker: "fuji_sale_assistant", title:"Echigoya sales assistant (Building)", loc: [5961.62, 6307.76] },
+		{ marker: "fuji_nanaha", title:"Princess Nanaha (Building)", loc: [5828.81, 6483.74] },
+		{ marker: "fuji_king", title:"King (Building)", loc: [5908.5, 6554.3] },
+		{ marker: "fuji_maze_guard", title:"Guard of the maze (Building)", loc: [5853.71, 6687.11] },
+		{ marker: "fuji_otomi", title:"Otomi (Building)", loc: [6206.49, 6139.26] },
+		{ marker: "fuji_medium", title:"Spirit Mediums (Building)", loc: [6282.86, 6169.14] },
+		{ marker: "fuji_cake_shop", title:"Dumpling Cake shop (Building)", loc: [5917.63, 6008.94] },
+		{ marker: "fuji_uzumasa", title:"Uzumasa (Building)", loc: [5781.49, 6386.62] },
+		{ marker: "fuji_iwasuke", title:"Iwasuke (Building)", loc: [6070.36, 6919.53] },
+		{ marker: "fuji_hakosuke", title:"Hakosuke (Building)", loc: [5679.39, 6743.55] },
+		{ marker: "fuji_nobizo", title:"Nobizo (Building)", loc: [5849.56, 6341.8] },
+		{ marker: "fuji_natsuo", title:"Natsuo (Building)", loc: [5280.13, 6665.53] },
+		{ marker: "fuji_hanako", title:"Hanako (Building)", loc: [5684.38, 6483.74] },
+		{ marker: "sandpolis_qfactory", title:"Q's Factory (Building)", loc: [2326.71, 6345.95] },
+		{ marker: "sandpolis_parts", title:"Parts Shop (Building)", loc: [2380.66, 6411.52] },
+		{ marker: "sandpolis_body", title:"Body Shop (Building)", loc: [2381.49, 6346.78] },
+		{ marker: "sandpolis_paint", title:"Paint Shop (Building)", loc: [2327.54, 6411.52] },
+		{ marker: "sandpolis_bartender", title:"Bartender (Building)", loc: [2593.16, 5950] },
+		{ marker: "sandpolis_police", title:"Captain Rombo (Building)", loc: [2569.09, 6124.32] },
+		{ marker: "sandpolis_figure8", title:"Figure 8 Registration (Building)", loc: [3012.35, 6658.06] },
+		{ marker: "sandpolis_football", title:"Football Registration, (Building)", loc: [3037.26, 6255.47] },
+		{ marker: "sandpolis_roulette", title:"Roulette Registration (Building)", loc: [3112.79, 6499.51] },
+		{ marker: "sandpolis_tony", title:"Tony (Building)", loc: [2293.51, 6379.98] },
+		{ marker: "sandpolis_johnny", title:"Johnny (Building)", loc: [2493.55, 5989.01] },
+		{ marker: "sandpolis_frank", title:"Frank (Building)", loc: [2538.38, 6056.25] },
+		{ marker: "sandpolis_sebastian", title:"Sebastian (Building)", loc: [2485.25, 6399.07] },
+		{ marker: "sandpolis_shop_manager", title:"Shop Manager (Building)", loc: [3103.66, 6320.21] },
+		{ marker: "sandpolis_mr_king", title:"Mr. King (Building)", loc: [2471.14, 6679.64] },
+		{ marker: "sandpolis_butch", title:"Butch (Building)", loc: [2056.93, 5660.3] },
+		{ marker: "sandpolis_barton", title:"Barton (Building)", loc: [2784.91, 6424.8] },
+		{ marker: "sandpolis_chocolat", title:"Chocolat (Building)", loc: [3008.2, 6779.25] },
+		{ marker: "sandpolis_merci", title:"Merci (Building)", loc: [2699.41, 6417.33] },
+		{ marker: "sandpolis_bob", title:"Bob (Building)", loc: [2447.9, 6355.91] },
+		{ marker: "sandpolis_richard", title:"Richard (Building)", loc: [2506.01, 6360.06] },
+		{ marker: "chestnut_qfactory", title:"Q's Factory (Building)", loc: [5497.61, 3872.31] },
+		{ marker: "chestnut_bartender", title:"Bartender (Building)", loc: [5571.48, 3890.58] },
+		{ marker: "chestnut_wallace", title:"Wallace (Building)", loc: [5583.11, 3927.1] },
+		{ marker: "chestnut_gene", title:"Gene (Building)", loc: [5287.6, 3966.94] },
+		{ marker: "chestnut_maya_carton", title:"Maya Carton (Building)", loc: [5743.31, 3756.93] },
+		{ marker: "chestnut_rock_climbing", title:"Rock Climbing entrance (Building)", loc: [5548.24, 3693.85] },
+		{ marker: "chestnut_mason", title:"Mason (Building)", loc: [5618.8, 3634.08] },
+		{ marker: "chestnut_ross_rorke", title:"Ross Rorke (Building)", loc: [5286.77, 3808.4] },
+		{ marker: "chestnut_tom", title:"Tom (Building)", loc: [5466.06, 3990.19] },
+		{ marker: "chestnut_lowry", title:"Lowry (Building)", loc: [5485.99, 3988.53] },
+		{ marker: "chestnut_betty", title:"Betty (Building)", loc: [5547.41, 3970.26] },
+		{ marker: "chestnut_lucy", title:"Lucy (Building)", loc: [5546.58, 3988.53] },
+		{ marker: "mushroom_qfactory", title:"Q's Factory (Building)", loc: [7659.13, 4171.14] },
+		{ marker: "mushroom_parts", title:"Parts Shop (Building)", loc: [7629.25, 4189.4] },
+		{ marker: "mushroom_bartender", title:"Bartender (Building)", loc: [7587.74, 4509.81] },
+		{ marker: "mushroom_jumbo", title:"Jumbo (Building)", loc: [7528.81, 4469.97] },
+		{ marker: "mushroom_goddess", title:"Goddess (Building)", loc: [7646.68, 4469.97 ] },
+		{ marker: "white_mt_qfactory", title:"Q's Factory (Building)", loc: [9290.23, 2658.74] },
+		{ marker: "white_mt_parts", title:"Parts Shop (Building)", loc: [9360.79, 2869.58] },
+		{ marker: "white_mt_body", title:"Body Shop (Building)", loc: [9349.17, 2668.7] },
+		{ marker: "white_mt_paint", title:"Paint Shop (Building)", loc: [9340.04, 2899.46] },
+		{ marker: "white_mt_bartender", title:"Bartender (Building)", loc: [9250.39, 2875.39] },
+		{ marker: "white_mt_police", title:"Policeman (Building)", loc: [9189.79, 2674.51] },
+		{ marker: "white_mt_merrin", title:"Merrin (Building)", loc: [9627.25, 2979.15] },
+		{ marker: "white_mt_ski_jump", title:"Ski Jumping Registration (Building)", loc: [9622.27, 2730.13] },
+		{ marker: "white_mt_grandma_dizzy", title:"Grandma Dizzy (Building)", loc: [9482.81, 3100.34] },
+		{ marker: "white_mt_lettar", title:"Lettar (Building)", loc: [9299.37, 2898.63] },
+		{ marker: "white_mt_santa", title:"Santa Claus (Building)", loc: [9867.14, 3499.61] },
+		{ marker: "white_mt_keitel", title:"Keitel (Building)", loc: [9437.16, 3557.71] },
+		{ marker: "white_mt_ross", title:"Ross (Building)", loc: [9318.46, 3556.05] },
+		{ marker: "white_mt_busheme", title:"Busheme (Building)", loc: [9258.69, 3555.22] },
+		{ marker: "white_mt_madison", title:"Madison (Building)", loc: [9198.1, 3555.22] },
+		{ marker: "white_mt_bunger", title:"Bunger (Building)", loc: [9135.01, 3556.05] },
+		{ marker: "white_mt_emily", title:"Emily (Building)", loc: [9374.07, 3189.16] },
+		{ marker: "white_mt_bigfoot", title:"Bigfoot Joe (Building)", loc: [9762.55, 3250.59] },
+		{ marker: "white_mt_curling", title:"Curling Registration (Building)", loc: [9456.25, 3307.86] },
+		{ marker: "white_mt_kate", title:"Kate (Building)", loc: [9193.12, 2868.75 ] },
+		{ marker: "papaya_island_qfactory", title:"Q's Factory (Building)", loc: [9174.02, 12602.25] },
+		{ marker: "papaya_island_parts", title:"Parts Shop (Building)", loc: [9134.18, 12708.5] },
+		{ marker: "papaya_island_body", title:"Body Shop (Building)", loc: [9012.99, 12500.98] },
+		{ marker: "papaya_island_bartender", title:"Bartender (Building)", loc: [9220.51, 12454.49] },
+		{ marker: "papaya_island_police", title:"Policeman (Building)", loc: [9180.66, 12544.14] },
+		{ marker: "papaya_island_obstacle", title:"Obstacle Course Registration (Building)", loc: [9655.47, 12872.85] },
+		{ marker: "papaya_island_papaya_mayor", title:"Papaya Mayor (Building)", loc: [9210.55, 12414.65] },
+		{ marker: "papaya_island_luke", title:"Luke (Building)", loc: [8989.75, 12537.5] },
+		{ marker: "papaya_island_granpa_costello", title:"Grandpa Costello (Building)", loc: [9736.82, 12847.95] },
+		{ marker: "papaya_island_andy", title:"Andy (Building)", loc: [9114.26, 12740.04] },
+		{ marker: "papaya_island_shirley", title:"Shirley (Building)", loc: [8920.02, 12603.91] },
+		{ marker: "papaya_island_casa", title:"Casa (Building)", loc: [9369.92, 13321.09] },
+		{ marker: "papaya_island_sandro", title:"Sandro (Building)", loc: [9717.72, 12949.22] },
+		{ marker: "papaya_island_micky", title:"Micky (Building)", loc: [9150.78, 12663.67] },
+		{ marker: "papaya_island_daniel", title:"Daniel (Building)", loc: [9723.54, 12909.38] },
+		{ marker: "papaya_island_shimisa", title:"Shimisa (Building)", loc: [9202.25, 12313.38] },
+		{ marker: "papaya_island_romba", title:"Romba (Building)", loc: [9296.88, 13120.21] },
+		{ marker: "papaya_island_pollepolle", title:"Pollepolle (Building)", loc: [9063.62, 13134.33] },
+		{ marker: "my_city_qfactory", title:"Q's Factory (Building)", loc: [2919.38, 9830.62] },
+		{ marker: "my_city_parts", title:"Parts Shop (Building)", loc: [2858.79, 9924.41] },
+		{ marker: "my_city_body", title:"Body Shop (Building)", loc: [3106.98, 10091.26] },
+		{ marker: "my_city_paint", title:"Paint Shop (Building)", loc: [3122.75, 9863.82] },
+		{ marker: "my_city_police", title:"Accel (Building)", loc: [2919.38, 9918.6] },
+		{ marker: "my_city_2nd_shop", title:"Second-hand shop (Building)", loc: [2979.15, 9867.97] },
+		{ marker: "my_city_estate_agent", title:"Wonder Estate Agency (Building)", loc: [2974.17, 9760.89] },
+		{ marker: "my_city_manei", title:"Manei (Building)", loc: [3055.52, 9879.59] },
+		{ marker: "my_city_george", title:"George (Building)", loc: [3024.8, 9950.15] },
+		{ marker: "my_city_roberts", title:"Roberts (Building)", loc: [2911.08, 10116.99] },
+		{ marker: "my_city_dayan", title:"Dayan (Building)", loc: [2921.04, 9951.81] },
+		{ marker: "my_city_brian", title:"Brian (Building)", loc: [2852.98, 9880.42] },
+		{ marker: "my_city_roji", title:"Roji, teacher (Building)", loc: [2615.58, 9900.34] },
+		{ marker: "my_city_coine", title:"Coine (Building)", loc: [2770.8, 9959.28] },
+		{ marker: "my_city_kuwano", title:"Kuwano (Building)", loc: [2788.23, 9879.59] },
+		{ marker: "my_city_mien", title:"Mien (Building)", loc: [2769.14, 10116.99] },
+		{ marker: "my_city_flower", title:"Flower (Building)", loc: [2705.22, 9931.88] },
+		{ marker: "my_city_gichi", title:"Gichi (Building)", loc: [2696.92, 10014.06] },
+		{ marker: "my_city_akiban", title:"Akiban (Building)", loc: [2768.31, 10064.7] },
+		{ marker: "my_city_sally", title:"Sally (Building)", loc: [2706.05, 9872.95] },
+		{ marker: "my_city_rally", title:"Rally Center (Building)", loc: [3141.02, 9899.51] },
+		{ marker: "_laz", title:"Laz (Building)", loc: [8787.21, 6169.14] },
+		{ marker: "_ufo", title:"UFO (Building)", loc: [3897.22, 5699.32] },
+		{ marker: "_benji", title:"Benji (Building)", loc: [2896.14, 5100.83] },
+		{ marker: "lighthouse_picarl", title:"Picarl (Building)", loc: [1899.22, 5336.57] },
+		{ marker: "202_seidon", title:"Seidon (Building)", loc: [9344.19, 1343.9] },
 	];
-	
+
 	/*
 	Converts from lat/lng to x/y in game
 	var quickpic_data2 = [];
-	
+
 	for (m = 0; m < quickpic_data.length; m++) {
 		const marker_data = quickpic_data[m];
 		var y = marker_data[5];
@@ -640,96 +642,91 @@
 		newData = [ marker_data[0], marker_data[1], marker_data[2], marker_data[3], marker_data[4], y, x ];
 		quickpic_data2.push(newData);
 	}*/
-    
+
     // Setup qp markers
     var quickpic_markers = [];
     for (m = 0; m < quickpic_data.length; m++) {
         const marker_data = quickpic_data[m];
-        //console.log([marker_data[5],marker_data[6]]);
-        const marker = L.marker([marker_data[5],marker_data[6]], {
+        const marker = L.marker(marker_data['loc'], {
           draggable: false,
+          title: marker_data['title'],
         });//.addTo(map);
         quickpic_markers.push(marker);
-        const popupText = marker_data[1].toString();
+        const popupText = `<h3>${marker_data['title']}</h3><p>${marker_data['description']}</p>`;
         marker.bindPopup(popupText).openPopup();
         marker.on('dragend', function(e) {
             var pos = marker.getLatLng();
             pos = L.latLng(pos.lat - 400, pos.lng); // Adjust due to map border
             var popupContent = `Position: X: ${pos.lng.toFixed(2)} Y: ${pos.lat.toFixed(2)}`;
             marker.getPopup().setContent(popupContent).openOn(map);
-            console.log("[\""+marker_data[0]+"\", \""+marker_data[1]+"\", \""+marker_data[2]+"\", \""+marker_data[3]+"\", \""+marker_data[4]+"\", "+marker.getLatLng().lat+", "+marker.getLatLng().lng+"],");
+            console.log(marker_data);
         });
     }
     // Setup town markers
     var town_markers = [];
     for (m = 0; m < town_data.length; m++) {
         const marker_data = town_data[m];
-        //console.log([marker_data[5],marker_data[6]]);
-        const marker = L.marker([marker_data[5],marker_data[6]], {
+        const marker = L.marker(marker_data['loc'], {
           draggable: false,
+          title: marker_data['title'],
         });//.addTo(map);
         town_markers.push(marker);
-        const popupText = marker_data[1].toString();
+        const popupText = `<h3>${marker_data['title']}</h3><p>${marker_data['place']}</p>`;
         marker.bindPopup(popupText).openPopup();
         marker.on('dragend', function(e) {
           marker.getPopup().setContent(marker.getLatLng().toString()).openOn(map);
-          console.log("[\""+marker_data[0]+"\", \""+marker_data[1]+"\", \""+marker_data[2]+"\", \""+marker_data[3]+"\", \""+marker_data[4]+"\", "+marker.getLatLng().lat+", "+marker.getLatLng().lng+"],");
-          //console.log(marker.getLatLng());
+          console.log(marker_data);
         });
     }
-	
+
 	// Setup buildings/npcs
 	var npcs_markers = [];
     for (m = 0; m < building_data.length; m++) {
         const marker_data = building_data[m];
-        //console.log([marker_data[5],marker_data[6]]);
-        const marker = L.marker([marker_data[2],marker_data[3]], {
+        const marker = L.marker(marker_data['loc'], {
           draggable: false,
+          title: marker_data['title'],
         });//.addTo(map);
         npcs_markers.push(marker);
-        const popupText = marker_data[1].toString();
+        const popupText = `<h3>${marker_data['title']}</h3>`;
         marker.bindPopup(popupText).openPopup();
         marker.on('dragend', function(e) {
           marker.getPopup().setContent(marker.getLatLng().toString()).openOn(map);
-          console.log("[\""+marker_data[0]+"\", \""+marker_data[1]+"\", "+marker.getLatLng().lat+", "+marker.getLatLng().lng+"],");
-          //console.log(marker.getLatLng());
+          console.log(marker_data);
         });
     }
-	
+
 	var coin_markers = [];
     for (m = coin_data.length-1; m > 0; m--) {
         const marker_data = coin_data[m];
-        //console.log([marker_data[5],marker_data[6]]);
-        const marker = L.marker([marker_data[4]+400,marker_data[5]], {icon: icon_coin}, {
+        const marker = L.marker([marker_data['loc'][0]+400,marker_data['loc'][1]], {icon: icon_coin}, {
           draggable: false,
+          title: marker_data['title'],
         });//.addTo(map);
         coin_markers.push(marker);
-        const popupText = marker_data[1].toString();
+        const popupText = `<h3>${marker_data['title']}</h3><p>${marker_data['description']}</p>`;
         marker.bindPopup(popupText).openPopup();
         marker.on('dragend', function(e) {
-          marker.getPopup().setContent(marker.getLatLng().toString()).openOn(map);
-          console.log("[\""+marker_data[0]+"\", \""+marker_data[1]+"\", \""+marker_data[2]+"\", \""+marker_data[3]+"\", "+marker.getLatLng().lat+", "+marker.getLatLng().lng+"],");
-          //console.log(marker.getLatLng());
+            marker.getPopup().setContent(marker.getLatLng().toString()).openOn(map);
+            console.log(marker_data);
         });
     }
-	
+
 	var gem_markers = [];
     for (m = gem_data.length-1; m >= 0; m--) {
         const marker_data = gem_data[m];
-        //console.log([marker_data[5],marker_data[6]]);
-        const marker = L.marker([marker_data[4],marker_data[5]], {icon: marker_data[6]}, {
+        const marker = L.marker([marker_data['loc'][0]+400,marker_data['loc'][1]], {icon: marker_data['icon']}, {
           draggable: true,
         });//.addTo(map);
         gem_markers.push(marker);
-        const popupText = marker_data[1].toString();
+        const popupText = `<h3>${marker_data['title']}</h3><p>${marker_data['description']}</p>`;
         marker.bindPopup(popupText).openPopup();
         marker.on('dragend', function(e) {
-          marker.getPopup().setContent(marker.getLatLng().toString()).openOn(map);
-          console.log("[\""+marker_data[0]+"\", \""+marker_data[1]+"\", \""+marker_data[2]+"\", \""+marker_data[3]+"\", "+marker.getLatLng().lat+", "+marker.getLatLng().lng+"],");
-          //console.log(marker.getLatLng());
+		    marker.getPopup().setContent(marker.getLatLng().toString()).openOn(map);
+		    console.log(marker_data);
         });
     }
-	
+
 	// Setup region bounds
 	var regions = [];
 	for (var c = 0; c < 4; c++) {
@@ -737,8 +734,8 @@
 			for (var a = 0; a < 4; a++) {
 				var x = b * 3200 + (a % 2) * 1600;
 				var y = c * 3200 + 400; // Adding 400 here to correct for image issues
-				if (a > 1) { 
-					x += 800; 
+				if (a > 1) {
+					x += 800;
 					y += 1600;
 				}
 				// Draw region
@@ -766,8 +763,10 @@
                 x = latlng[1];
                 town_paths[t][p]['path'][point] = [y, x];
 	        }
-	        var polyline = L.polyline(town_paths[t][p]['path'], {smoothFactor:5.0, color:town_paths[t][p]['color']});
-	        const popupText = `<h3>NPC: ${town_paths[t][p]['name']}</h3> <p style="color: '${town_paths[t][p]['color']}'">Town: ${town_names[t]} (${t}) Path: ${p}</p> <p>This path has ${town_paths[t][p]['path'].length} points</p>`;
+	        var options = town_paths[t][p].options;
+	        options.smoothFactor = 5.0;
+	        var polyline = L.polyline(town_paths[t][p].path, options);
+	        const popupText = `<h3>NPC: ${town_paths[t][p].options.name}</h3> <p style="color: '${town_paths[t][p].options.color}'">Town: ${town_names[t]} (${t}) Path: ${p}</p> <p>This path has ${town_paths[t][p].path.length} points</p>`;
             polyline.bindPopup(popupText).openPopup();
             npcs_paths.push(polyline);
         }
@@ -777,32 +776,30 @@
     var course_markers = [];
     for (m = 0; m < course_data.length; m++) {
         const marker_data = course_data[m];
-        //console.log([marker_data[5],marker_data[6]]);
-        const marker = L.marker([marker_data[5]+400,marker_data[6]], {
+        const marker = L.marker([marker_data['loc'][0]+400,marker_data['loc'][1]], {
           draggable: false,
+          title: marker_data['title'],
         });//.addTo(map);
         course_markers.push(marker);
-        const popupText = marker_data[1].toString();
+        const popupText = `<h3>${marker_data['file'].toString()}: ${marker_data['title']}</h3><p>${marker_data['description']}</p>`;
         marker.bindPopup(popupText).openPopup();
         marker.on('dragend', function(e) {
-          marker.getPopup().setContent(marker.getLatLng().toString()).openOn(map);
-          console.log("[\""+marker_data[0]+"\", \""+marker_data[1]+"\", \""+marker_data[2]+"\", \""+marker_data[3]+"\", \""+marker_data[4]+"\", "+marker.getLatLng().lat+", "+marker.getLatLng().lng+"],");
-          //console.log(marker.getLatLng());
+            marker.getPopup().setContent(marker.getLatLng().toString()).openOn(map);
+            console.log(marker_data);
         });
     }
     for (m = 0; m < action_data.length; m++) {
         const marker_data = action_data[m];
-        //console.log([marker_data[5],marker_data[6]]);
-        const marker = L.marker([marker_data[5]+400,marker_data[6]], {
+        const marker = L.marker([marker_data['loc'][0]+400,marker_data['loc'][1]], {
           draggable: false,
+          title: marker_data['title'],
         });//.addTo(map);
         course_markers.push(marker);
-        const popupText = marker_data[1].toString();
+        const popupText = `<h3>${marker_data['file'].toString()}: ${marker_data['title']}</h3><p>${marker_data['description']}</p>`;
         marker.bindPopup(popupText).openPopup();
         marker.on('dragend', function(e) {
           marker.getPopup().setContent(marker.getLatLng().toString()).openOn(map);
-          console.log("[\""+marker_data[0]+"\", \""+marker_data[1]+"\", \""+marker_data[2]+"\", \""+marker_data[3]+"\", \""+marker_data[4]+"\", "+marker.getLatLng().lat+", "+marker.getLatLng().lng+"],");
-          //console.log(marker.getLatLng());
+          console.log(marker_data);
         });
     }
     var course_paths = [];
@@ -815,14 +812,16 @@
             x = latlng[1];
             cloud_hill_paths[p]['path'][point] = [y, x];
         }
-        var polyline = L.polyline(cloud_hill_paths[p]['path'], {smoothFactor:5.0, color:cloud_hill_paths[p]['color']});
-        const popupText = `<h3>NPC: ${cloud_hill_paths[p]['name']}</h3> <p style="color: '${cloud_hill_paths[p]['color']}'">Town: Cloud Hill (${t}) Path: ${p}</p> <p>This path has ${cloud_hill_paths[p]['path'].length} points</p>`;
+        var options = cloud_hill_paths[p].options;
+        options.smoothFactor = 5.0;
+        var polyline = L.polyline(cloud_hill_paths[p].path, options);
+        const popupText = `<h3>NPC: ${cloud_hill_paths[p].options.name}</h3> <p style="color: '${cloud_hill_paths[p].options.color}'">Town: Cloud Hill (${t}) Path: ${p}</p> <p>This path has ${cloud_hill_paths[p].path.length} points</p>`;
         polyline.bindPopup(popupText).openPopup();
         course_paths.push(polyline);
     }
 
 
-    
+
     // World overlays, like markers
     var mg_towns = L.layerGroup(town_markers);
     var mg_quickpic = L.layerGroup(quickpic_markers);
@@ -831,6 +830,7 @@
 	var mg_npcs = L.layerGroup(npcs_markers);
 	var npc_paths = L.layerGroup(npcs_paths);
 	var world_overlay_regions = L.layerGroup(regions);
+
     var world_overlays = {
 		"Characters": mg_npcs,
         "Towns" : mg_towns,
@@ -916,15 +916,43 @@
           control_layer.removeLayer(world_overlays[name]);
         }
 	});
-	control_layer.addTo(map);
+
+    // Setup search
+    // PinSearch component
+    var searchBar = L.control.pinSearch({
+        position: 'topright',
+        placeholder: 'Search...',
+        buttonText: 'Search',
+        focusOnMarker: true,
+        openPopup: true,
+        onSearch: function(query) {
+
+            console.log('Search query:', query);
+            // Handle the search query here
+            //for (int i = 0 ; i < search_group.length; i++) {
+            //    var markers = search_group[i];
+            //    for (int m = 0 ; m < makers.length; m++) {
+            //
+            //    }
+            //}
+        },
+        searchBarWidth: '200px',
+        searchBarHeight: '30px',
+        maxSearchResults: 3
+    }).addTo(map);
+
+    // Add events to listen for change of selected views/data/markers/paths
+	function marker_selected(e) {
+	  console.log(e);
+	  searchBar._populateMarkerLabels(map);
+	};
+    map.on('overlayadd', marker_selected);
+
+    // Add layer ui and setup defaults
+    control_layer.addTo(map);
 	world_layer.addTo(map);
 	map.removeLayer(course_layer);
 	mg_towns.addTo(map);
-
-
-
-
-
 
 	map.attributionControl.addAttribution('<a href="https://www.takaratomy.co.jp/english/">Takara</a>');
 	map.attributionControl.addAttribution('<a href="http://www.e-game.co.jp/">E-Game</a>');
