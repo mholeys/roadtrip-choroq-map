@@ -80,9 +80,9 @@ L.Control.PinSearch = L.Control.extend({
   },
 
   _populateMarkerLabels: function(map) {
+    this._clearSearchResults(this._container);
     this.labels = [];
     map.eachLayer(function(layer) {
-      console.log(layer);
       if (layer instanceof L.Marker && layer.options.title) {
         this.labels.push([layer, layer.options.title]);
       } else if (layer instanceof L.Polyline && layer.options.title) {
@@ -160,7 +160,6 @@ L.Control.PinSearch = L.Control.extend({
       var highlightedItem = this._container.querySelector('.search-results-item.highlight');
       if (highlightedItem) {
         var query = highlightedItem.textContent;
-        console.log(query);
         this._onSearchItemClick(query);
       }
     }
@@ -209,13 +208,20 @@ L.Control.PinSearch = L.Control.extend({
         var highlightedItem = resultsContainer.querySelector('.search-results-item.highlight');
         if (highlightedItem) {
           var query = highlightedItem.textContent;
-          console.log(query);
           this._onSearchItemClick(query);
         }
       }
     }
   },
-  
+
+  _clearSearchResults: function(container) {
+    if (container) {
+        var resultsContainer = container.querySelector('.search-results');
+        resultsContainer.innerHTML = '';
+        resultsContainer.style.display = 'none';
+    }
+  },
+
   _showSearchResults: function(matches) {
     var self = this;
     var resultsContainer = this._container.querySelector('.search-results');
@@ -255,7 +261,6 @@ L.Control.PinSearch = L.Control.extend({
         if (marker) {
             var zoom = this._map._zoom;
             if (this.options.openPopup) {
-                console.log(marker);
                 marker.openPopup();
                 if (this._map._zoom < 2) {
                     zoom = 5;
@@ -268,7 +273,6 @@ L.Control.PinSearch = L.Control.extend({
             if (polyline) {
                 var zoom = this._map._zoom;
                 if (this.options.openPopup) {
-                    console.log(polyline);
                     polyline.openPopup();
                     if (this._map._zoom < 2) {
                     zoom = 5;
